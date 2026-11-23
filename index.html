@@ -266,7 +266,7 @@ function showLongPress(){
   img.src = URL.createObjectURL(readyBlob); img.hidden = false;
   document.getElementById("sq").hidden = true; document.getElementById("acorns").textContent = "";
   document.getElementById("shareNow").hidden = true;
-  document.getElementById("loaderMsg").textContent = "이미지를 꾹 눌러 사진첩에 저장해 주세요.";
+  document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요! 이미지를 꾹 눌러 사진첩에 저장해 주세요.";
   if (IN_KAKAO) { const a = document.getElementById("openExternal");
     a.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(PAGE_URL + lastResult); a.hidden = false; }
 }
@@ -329,9 +329,19 @@ function loaderOpen(){
   document.getElementById("sq").hidden = false;
   document.getElementById("loader").hidden = false; LD.start();
 }
+// Pick the one action this browser can really do, and name the button after it
 function loaderDone(){
-  document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요!";
-  document.getElementById("shareNow").hidden = false;
+  const file = new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
+  const btn = document.getElementById("shareNow");
+  if (navigator.canShare?.({files:[file]})) {
+    document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요!";
+    btn.textContent = "인스타 스토리에 공유하기"; btn.hidden = false;
+  } else if (IS_MOBILE) {
+    showLongPress();
+  } else {
+    document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요!";
+    btn.textContent = "이미지 저장하기"; btn.hidden = false;
+  }
 }
 function loaderClose(){ LD.stop(); document.getElementById("loader").hidden = true; }
 
