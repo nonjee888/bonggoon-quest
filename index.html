@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>봉군이 궁합 테스트</title>
+<meta name="description" content="가족을 찾고 있는 8살 강아지 봉군이와 나의 산책 궁합을 알아보세요.">
+<meta property="og:title" content="나와 봉군이, 산책 궁합은 몇 %?">
+<meta property="og:description" content="질문 6개로 봉군이와 나의 궁합을 알아보세요.">
+<meta property="og:image" content="https://nonjee888.github.io/bonggoon-quest/img/apple.jpg">
+<meta property="og:url" content="https://nonjee888.github.io/bonggoon-quest/">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;700&family=Press+Start+2P&display=swap">
+<style>
+/* Layout: 픽셀 풀밭 — checkered grass ground, every block of content is a chunky wooden sign with hard pixel bevels. One column. */
+:root{
+  --grass:#62B43A; --grass-2:#58A833; --grass-dark:#2F6B1C;
+  --dirt:#8A5A33; --dirt-2:#73482A;
+  --sign:#F4E3B5; --sign-hi:#FFF4D2; --sign-lo:#C9A063;
+  --ink:#2B1D10; --muted:#6E5A3F;
+  --accent:#FF7A2E; --accent-hi:#FFB27F; --accent-lo:#C2501A;
+  --gold:#FFD54A; --sky:#BFE7FF;
+  --display:"Do Hyeon","Gothic A1",system-ui,sans-serif;
+  --body:"Gothic A1",system-ui,-apple-system,sans-serif;
+  --pixel:"Press Start 2P","Do Hyeon",monospace;
+}
+body{word-break:keep-all;overflow-wrap:break-word;background-color:var(--grass);
+  background-image:conic-gradient(var(--grass-2) 25%,transparent 0 50%,var(--grass-2) 0 75%,transparent 0);
+  background-size:28px 28px;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:480px;margin:0 auto;padding-block:20px 0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:34px}
+@media (max-width:699px){.wrap{gap:56px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.15;text-wrap:balance}
+p{margin:0}
+
+/* pixel primitives */
+.sign{background:var(--sign);border:4px solid var(--ink);
+  box-shadow:inset -5px -5px 0 var(--sign-lo),inset 5px 5px 0 var(--sign-hi),6px 6px 0 rgba(0,0,0,.28);
+  padding:18px;display:flex;flex-direction:column;gap:14px}
+.tag{display:inline-block;align-self:flex-start;font-family:var(--pixel);font-size:10px;line-height:1;letter-spacing:.02em;
+  background:var(--grass-dark);color:#fff;padding:8px 10px;border:3px solid var(--ink)}
+.on-grass{color:#fff;text-shadow:2px 2px 0 var(--grass-dark);font-weight:700;font-size:14px}
+
+.btn{appearance:none;cursor:pointer;font-family:var(--display);font-size:21px;line-height:1.2;color:var(--ink);text-align:center;text-decoration:none;display:block;
+  padding:14px 18px;background:var(--accent);border:4px solid var(--ink);
+  box-shadow:inset -5px -5px 0 var(--accent-lo),inset 5px 5px 0 var(--accent-hi),4px 4px 0 rgba(0,0,0,.3)}
+.btn:active{transform:translate(3px,3px);box-shadow:inset -5px -5px 0 var(--accent-lo),inset 5px 5px 0 var(--accent-hi)}
+.btn.alt{background:var(--sign);box-shadow:inset -5px -5px 0 var(--sign-lo),inset 5px 5px 0 var(--sign-hi),4px 4px 0 rgba(0,0,0,.3)}
+.btn:focus-visible,.opt:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
+.small{font-size:14px;color:var(--muted)}
+
+/* hero */
+.frame{border:4px solid var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.28);background:var(--sky);line-height:0}
+.frame img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center top;border:5px solid var(--sign)}
+.hero h1{font-size:clamp(38px,11vw,52px)}
+.hero h1 em{font-style:normal;color:var(--accent);text-shadow:3px 3px 0 var(--ink)}
+
+/* quiz */
+.prog{display:flex;align-items:center;gap:10px}
+.prog .lv{font-family:var(--pixel);font-size:11px;white-space:nowrap}
+.blocks{display:flex;gap:4px;flex:1}
+.blocks i{flex:1;height:16px;background:var(--sign-lo);border:3px solid var(--ink)}
+.blocks i.on{background:var(--gold)}
+.q{font-size:28px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{appearance:none;font:inherit;font-weight:700;color:var(--ink);text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center;
+  padding:12px;background:var(--sign-hi);border:3px solid var(--ink);box-shadow:inset -4px -4px 0 var(--sign-lo)}
+.opt:hover{background:#FFFBEA}
+.opt b{flex:none;font-family:var(--pixel);font-size:12px;width:30px;height:30px;display:grid;place-items:center;background:var(--grass);color:#fff;border:3px solid var(--ink)}
+
+/* license */
+.license{background:var(--sign-hi);border:4px solid var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.28)}
+.license .top{background:var(--grass-dark);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:4px solid var(--ink)}
+.license .top span:first-child{font-family:var(--display);font-size:20px}
+.license .top span:last-child{font-family:var(--pixel);font-size:9px}
+.license .body{padding:14px;display:grid;grid-template-columns:1fr;gap:12px}
+.license .photo{width:100%;aspect-ratio:1/1;background-size:cover;background-repeat:no-repeat;border:4px solid var(--ink);box-sizing:border-box}
+.license .lbl{font-size:12px;color:var(--muted);font-weight:700}
+.license .type{font-size:26px;margin:2px 0 8px}
+.license .pct{font-family:var(--pixel);font-size:24px;color:var(--accent);text-shadow:2px 2px 0 var(--ink);font-variant-numeric:tabular-nums}
+.license .desc{padding:0 14px 14px;font-size:15px;line-height:1.7}
+.license .stamp{margin:0 14px 14px;padding:10px 12px;background:var(--sign);border:3px dashed var(--sign-lo);font-size:13px;font-weight:700}
+.res{display:flex;flex-direction:column;gap:14px}
+.share-text{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:12px;border:3px solid var(--ink);background:var(--sign-hi);color:var(--ink);resize:none}
+.toast{font-size:14px;font-weight:700;min-height:1.4em;color:var(--grass-dark)}
+
+/* profile */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--sign-hi);border:3px solid var(--ink);padding:10px;box-shadow:inset -4px -4px 0 var(--sign-lo)}
+.stat span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.stat strong{font-family:var(--display);font-weight:400;font-size:24px}
+.traits{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.traits li{display:flex;gap:10px;align-items:baseline}
+.traits li::before{content:"";flex:none;width:10px;height:10px;background:var(--grass);border:2px solid var(--ink);transform:translateY(-1px)}
+.traits li.warn::before{background:var(--gold)}
+.pics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pics img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border:4px solid var(--ink)}
+.vax{background:var(--sign-hi);border:3px solid var(--ink);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0;font-variant-numeric:tabular-nums}
+.vax h3{grid-column:1/-1;font-size:20px}
+.vax dt{font-weight:700;color:var(--grass-dark)}
+.vax dd{margin:0}
+.cta{display:flex;flex-direction:column;gap:12px}
+.panel-h{font-size:26px}
+.sign .toast{color:var(--grass-dark);min-height:0}
+.sign .toast:empty{display:none}
+.btn.kakao{background:#FEE500;box-shadow:inset -5px -5px 0 #C9B400,inset 5px 5px 0 #FFF27A,4px 4px 0 rgba(0,0,0,.3)}
+.again{appearance:none;align-self:center;background:none;border:0;cursor:pointer;font-family:var(--display);font-size:20px;color:#fff;
+  text-shadow:2px 2px 0 var(--grass-dark);padding:8px 12px;text-decoration:underline;text-underline-offset:4px}
+.again:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
+
+/* ground */
+.ground{margin-top:20px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
+  background:var(--dirt);background-image:conic-gradient(var(--dirt-2) 25%,transparent 0 50%,var(--dirt-2) 0 75%,transparent 0);background-size:20px 20px;
+  border-top:10px solid var(--grass-dark);padding:22px max(16px,env(safe-area-inset-left,0px)) 40px;text-align:center;font-size:13px;color:#F4E3B5}
+.ground a{color:#fff;font-weight:700}
+@media (max-width:699px){.ground{margin-inline:calc(-1 * max(28px,env(safe-area-inset-left,0px)));padding-inline:max(28px,env(safe-area-inset-left,0px))}}
+@media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
+#loader{position:fixed;inset:0;z-index:50;overflow:auto;display:grid;place-items:center;background:rgba(43,29,16,.6);
+  padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+#sq{width:100%;height:auto;image-rendering:pixelated;background:var(--sky);border:3px solid var(--ink)}
+</style>
+
+<div class="wrap">
+  <section class="hero" style="display:flex;flex-direction:column;gap:16px">
+    <div class="frame"><img src="img/apple.jpg" alt="머리 위에 초록 열매를 얹고 얌전히 앉아 있는 봉군이"></div>
+    <div class="sign">
+      <span class="tag" style="font-family:var(--display);font-size:16px;letter-spacing:0">봉군이의 가족을 찾고 있어요</span>
+      <h1>나와 <em>봉군이</em>,<br>산책 궁합은 몇 %?</h1>
+      <p>질문 6개로 봉군이와 나의 궁합을 알아보세요.</p>
+    </div>
+  </section>
+
+  <section id="start" class="cta">
+    <button class="btn" id="go" type="button">▶ 산책 출발하기</button>  </section>
+
+  <section class="sign" id="quiz" hidden>
+    <div class="prog"><span class="lv" id="count"></span><div class="blocks" id="blocks"></div></div>
+    <h2 class="q" id="q"></h2>
+    <div class="opts" id="opts"></div>
+  </section>
+
+  <section class="res" id="result" hidden>
+    <div class="license">
+      <div class="top"><span>봉군이 산책 면허증</span><span id="rNo"></span></div>
+      <div class="body">
+        <div class="photo" id="rImg" role="img"></div>
+        <div>
+          <div class="lbl">나와 봉군이는</div>
+          <h2 class="type" id="rType"></h2>
+          <div class="lbl">궁합 지수</div>
+          <div class="pct" id="rPct"></div>
+        </div>
+      </div>
+      <p class="desc" id="rDesc"></p>
+      <div class="stamp"><span id="rFact"></span></div>
+    </div>
+    <div class="sign">
+      <span class="tag">SHARE</span>
+      <h2 class="panel-h">봉군이 소식을 퍼뜨려 주세요</h2>
+      <p class="small">봉군이는 평생 가족을 기다리는 8살 남자 강아지예요. 결과를 공유해 주시면 봉군이가 가족을 더 빨리 찾을 수 있어요.</p>
+      <button class="btn" id="saveImg" type="button">면허증 저장 · 인스타 스토리</button>
+      <span class="toast" id="saveToast" role="status"></span>
+      <button class="btn kakao" id="kakao" type="button">카카오톡으로 공유하기</button>
+      <span class="toast" id="toast" role="status"></span>
+    </div>
+    <div class="sign">
+      <span class="tag">MEET</span>
+      <h2 class="panel-h">봉군이를 직접 만나고 싶다면</h2>
+      <p class="small">궁합은 재미로 봐 주세요. 진짜 인연은 입양 신청서에서 시작돼요.</p>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener">입양 신청서</a>
+      <a class="btn alt" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener">봉군이 인스타 @im.bonggoon</a>
+    </div>
+    <button class="again" id="again" type="button">↺ 테스트 다시 하기</button>
+  </section>
+
+  <section class="res" id="preview" hidden></section>
+
+  <section class="sign" id="profile">
+    <span class="tag">PROFILE</span>
+    <h2 style="font-size:32px">안녕하세요,<br>저는 봉군이예요.</h2>
+    <div class="stats">
+      <div class="stat"><span>나이</span><strong>8살</strong></div>
+      <div class="stat"><span>몸무게</span><strong>9.3kg</strong></div>
+      <div class="stat"><span>성별</span><strong>남아</strong></div>
+    </div>
+    <ul class="traits">
+      <li>중성화를 마쳤고, 기본 케어가 가능해요.</li>
+      <li>차를 잘 타요.</li>
+      <li>산책을 아주 좋아해요.</li>
+      <li class="warn">다른 강아지를 무서워하지만 적응하면 괜찮아요.</li>
+    </ul>
+    <div class="pics">
+      <img src="img/pro-wall.jpg" style="object-position:center 45%" alt="벽 옆에서 옆모습을 보이는 봉군이">
+      <img src="img/pro-doze.jpg" style="object-position:center 45%" alt="방석 위에 앉아 꾸벅꾸벅 조는 봉군이">
+    </div>
+    <dl class="vax">
+      <h3>예방접종 이력</h3>
+      <dt>25.05.19</dt><dd>코로나, 켄넬코프</dd>
+      <dt>25.11.09</dt><dd>종합, 광견병</dd>
+      <dt>25.12.09</dt><dd>인플루엔자</dd>
+    </dl>
+    <div class="cta" id="profileCta">
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener">입양 신청서</a>
+      <a class="btn alt" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener">봉군이 인스타 @im.bonggoon</a>
+    </div>
+  </section>
+
+  <footer class="ground">© 2026 봉군이 임시보호자<br>사진과 글을 무단으로 사용하지 말아 주세요.</footer>
+
+  <div id="loader" hidden role="dialog" aria-modal="true" aria-label="면허증 만들기">
+    <div class="sign" style="width:min(100%,360px);text-align:center">
+      <canvas id="sq" width="640" height="200" aria-hidden="true"></canvas>
+      <p id="loaderMsg" style="font-family:var(--display);font-size:22px">면허증을 만드는 중이에요...</p>
+      <p id="acorns" class="small" aria-live="polite"></p>
+      <img id="readyImg" hidden alt="완성된 봉군이 산책 면허증" style="width:100%;max-height:60vh;object-fit:contain;background:var(--ink);border:3px solid var(--ink);-webkit-touch-callout:default">
+      <a class="btn alt" id="openExternal" hidden>다른 브라우저로 열기</a>
+      <button class="btn" id="shareNow" type="button" hidden>스토리에 공유하기 · 저장하기</button>
+      <button class="btn alt" id="loaderClose" type="button">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
+<script>
+// ▼ 카카오 개발자 사이트(developers.kakao.com) > 내 애플리케이션 > 앱 키 > "JavaScript 키"를 따옴표 안에 넣어 주세요.
+const KAKAO_JS_KEY = "6fa94330683a60c696fe08b1c50fe356";
+
+const PAGE_URL = location.origin + location.pathname;
+let shareMsg = "";
+// 면허증 저장: render the license card onto a 1080x1920 story-sized canvas, then open the phone's share sheet (or download on PC)
+async function saveLicense(){
+  const toast = document.getElementById("saveToast");
+  if(!window.html2canvas){ toast.textContent = "지금은 저장할 수 없어요. 캡처해서 올려 주세요."; return; }
+  toast.textContent = "";
+  loaderOpen();
+  try{
+    const built = await Promise.all([buildLicense(), new Promise(r=>setTimeout(r,1400))]);
+    readyBlob = built[0];
+    loaderDone();
+  }catch(e){
+    loaderClose();
+    toast.textContent = "저장하지 못했어요. 캡처해서 올려 주세요.";
+  }
+}
+async function buildLicense(){
+    const card = await html2canvas(document.querySelector("#result .license"), {scale:3, backgroundColor:null});
+    const W=1080, H=1920, c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
+    x.fillStyle="#62B43A"; x.fillRect(0,0,W,H); x.fillStyle="#58A833";
+    for(let gy=0;gy<H;gy+=40) for(let gx=0;gx<W;gx+=40) if(((gx+gy)/40)%2) x.fillRect(gx,gy,40,40);
+    const w=920, h=Math.min(card.height*w/card.width, H-160);
+    x.drawImage(card,(W-w)/2,(H-h)/2,w,h);
+    // JPEG: Instagram's share target rejects some PNGs; fall back to dataURL if toBlob gives null (older iOS)
+    let blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.92));
+    if (!blob) blob = await (await fetch(c.toDataURL("image/jpeg",0.92))).blob();
+    return blob;
+}
+// ponytail: share runs from its own tap — the phone share sheet needs a fresh user gesture, which a long render would lose
+let readyBlob = null;
+// In-app browsers (KakaoTalk, Instagram) can't download blob files ("지원하지 않는 형식") and lack the share sheet,
+// so on phones we show the finished image to long-press-save instead.
+const UA = navigator.userAgent, IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA), IN_KAKAO = /KAKAOTALK/i.test(UA);
+function showLongPress(){
+  const img = document.getElementById("readyImg");
+  img.src = URL.createObjectURL(readyBlob); img.hidden = false;
+  document.getElementById("sq").hidden = true; document.getElementById("acorns").textContent = "";
+  document.getElementById("shareNow").hidden = true;
+  document.getElementById("loaderMsg").textContent = "이미지를 꾹 눌러 사진첩에 저장해 주세요.";
+  if (IN_KAKAO) { const a = document.getElementById("openExternal");
+    a.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(PAGE_URL + lastResult); a.hidden = false; }
+}
+async function shareReady(){
+  const toast = document.getElementById("saveToast");
+  const file = new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
+  if (navigator.canShare?.({files:[file]})) {
+    try{
+      await navigator.share({files:[file]});
+      loaderClose(); toast.textContent = "공유 창을 열었어요. 인스타그램 스토리를 골라 주세요.";
+    }catch(e){
+      if (e && e.name==="AbortError") { loaderClose(); toast.textContent = "공유를 취소했어요."; }
+      else showLongPress();
+    }
+  } else if (IS_MOBILE) {
+    showLongPress();
+  } else {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(readyBlob); a.download = file.name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    loaderClose(); toast.textContent = "저장했어요! 인스타그램에서 스토리에 올려 주세요.";
+  }
+}
+document.getElementById("saveImg").onclick = saveLicense;
+document.getElementById("shareNow").onclick = shareReady;
+document.getElementById("loaderClose").onclick = loaderClose;
+
+// 로딩: 픽셀 다람쥐가 좌우로 뛰어다니며 도토리를 주워요
+const LD = (()=>{
+  const PAL={b:"#B06A2E",B:"#7A4418",k:"#2B1D10",w:"#F4E3B5",n:"#C98A4B",g:"#3E8E2A"};
+  const SQ=[".BB.......","BbbB..bb..","BbbB.bbbb.",".BbbBbkbb.","..BbbbbbB.","...bbbww..","...bbbww..","..bb..bb.."];
+  const AC=[".BBB.","BBBBB",".nnn.",".nnn.","..n.."];
+  const cv=document.getElementById("sq"), x=cv.getContext("2d"), U=8, W=cv.width, H=cv.height, GROUND=H-16;
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let raf=0, sx=20, dir=1, t=0, got=0, acorns=[];
+  const spawn=()=>({x:40+Math.random()*(W-120), wait:0});
+  function sprite(g, px, py, flip){
+    g.forEach((row,ry)=>[...row].forEach((ch,rx)=>{ if(ch==="."||!PAL[ch]) return;
+      x.fillStyle=PAL[ch]; x.fillRect(flip? px+(row.length-1-rx)*U : px+rx*U, py+ry*U, U, U); }));
+  }
+  function frame(){
+    t++; x.clearRect(0,0,W,H);
+    x.fillStyle="#62B43A"; x.fillRect(0,GROUND,W,16); x.fillStyle=PAL.g; x.fillRect(0,GROUND,W,4);
+    acorns.forEach(a=>{ if(a.wait>0){ a.wait--; if(!a.wait) Object.assign(a,spawn()); } else sprite(AC,a.x,GROUND-5*U,false); });
+    if(!still){ sx += dir*5; if(sx>W-10*U-10){dir=-1;} if(sx<10){dir=1;} }
+    const hop = still ? 0 : Math.abs(Math.sin(t/5))*18;
+    const cx = sx+5*U;
+    acorns.forEach(a=>{ if(!a.wait && Math.abs(a.x+2.5*U-cx)<3*U){ a.wait=40; got++; document.getElementById("acorns").textContent=`도토리 ${got}개 주웠어요`; } });
+    sprite(SQ, sx, GROUND-8*U-hop, dir<0);
+    raf=requestAnimationFrame(frame);
+  }
+  return {
+    start(){ got=0; sx=20; dir=1; acorns=[spawn(),spawn(),spawn()]; document.getElementById("acorns").textContent=""; cancelAnimationFrame(raf); frame(); },
+    stop(){ cancelAnimationFrame(raf); },
+  };
+})();
+function loaderOpen(){
+  document.getElementById("loaderMsg").textContent = "면허증을 만드는 중이에요...";
+  document.getElementById("shareNow").hidden = true;
+  document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true;
+  document.getElementById("sq").hidden = false;
+  document.getElementById("loader").hidden = false; LD.start();
+}
+function loaderDone(){
+  document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요!";
+  document.getElementById("shareNow").hidden = false;
+}
+function loaderClose(){ LD.stop(); document.getElementById("loader").hidden = true; }
+
+// 카카오톡 공유: Kakao feed card when a key is set; otherwise copy the message so it can be pasted in KakaoTalk
+function shareKakao(){
+  const toast = document.getElementById("toast");
+  try{
+    if (KAKAO_JS_KEY && window.Kakao) {
+      if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY);
+      Kakao.Share.sendDefault({
+        objectType:"feed",
+        content:{ title:"나와 봉군이, 산책 궁합은 몇 %?", description: shareMsg.split("\n")[0],
+          imageUrl: new URL("img/apple.jpg", PAGE_URL).href, link:{mobileWebUrl:PAGE_URL, webUrl:PAGE_URL} },
+        buttons:[{ title:"나도 궁합 보기", link:{mobileWebUrl:PAGE_URL, webUrl:PAGE_URL} }],
+      });
+      return;
+    }
+  }catch(e){}
+  navigator.clipboard?.writeText(shareMsg).then(
+    ()=>{ toast.textContent = "공유 문구를 복사했어요. 카톡 대화방에 붙여 넣어 주세요."; },
+    ()=>{ toast.textContent = shareMsg; });
+}
+document.getElementById("kakao").onclick = shareKakao;
+
+// 픽셀 풀밭 패턴: sprites drawn once onto a 420px tile and used as the body background
+(function meadow(){
+  const PAL={r:"#E2384D",d:"#A3203A",g:"#3E8E2A",l:"#2F6B1C",p:"#FF8FB1",P:"#E2577F",o:"#8A5A33",y:"#E8C25A",Y:"#C9A03A",
+             b:"#B06A2E",B:"#7A4418",k:"#2B1D10",w:"#F4E3B5",W:"#FFFFFF",n:"#F7A1B5"};
+  const SP={
+    rose:["..rrr...",".rrdrr..","rrdrdrr.",".rdddr..","..rrr...","...g....",".l.g....",".llg....","...g.l..","...gll.."],
+    tulip:[".p.p.p.",".ppPpp.",".ppPpp.","..pPp..","...g...",".l.g.l.",".llgll.","...g..."],
+    sprout:[".l...l.","lll.lll",".lllll.","...g...","...g...","..ooo.."],
+    barley:["..y..",".yYy.",".yYy.",".yYy.","..Y..","..g..","..g..",".lg..","..g.."],
+    squirrel:[".BB.......","BbbB..bb..","BbbB.bbbb.",".BbbBbkbb.","..BbbbbbB.","...bbbww..","...bbbww..","..bb..bb.."],
+    skunk:["wk........","kwk..kk...","kwwk.kkk..",".kwwkkkwk.","..kwwwwkk.","...kkkkk..","...k..k..."],
+    rabbit:[".W.W..",".W.W..",".WnW..","WWWWW.","WkWWW.","WWWWWW",".WWWWW",".W..W."],
+  };
+  const PLACE=[["rose",27,39],["rabbit",225,21],["barley",354,126],["sprout",129,144],["squirrel",45,240],["tulip",279,225],["skunk",156,339],["sprout",369,354]];
+  // phone only: extra sprites in the gaps so the dense tile shows more
+  const MORE=[["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["rose",330,272],["barley",240,290],["tulip",60,345],["rabbit",290,370]];
+  // ponytail: two sizes only — phone (f=0.8: small, dense tile) and monitor (f=2); positions are in f=1 units, tile = 30 checker cells so it repeats seamlessly
+  const mq = matchMedia("(min-width: 700px)");
+  function draw(){
+    const f = mq.matches ? 2 : 0.8, C=Math.round(14*f), T=C*30, U=Math.round(5*f), S=2, c=document.createElement("canvas");
+    c.width=c.height=T*S; const x=c.getContext("2d");
+    x.fillStyle="#62B43A"; x.fillRect(0,0,T*S,T*S); x.fillStyle="#58A833";
+    for(let gy=0;gy<T;gy+=C) for(let gx=0;gx<T;gx+=C) if(((gx+gy)/C)%2) x.fillRect(gx*S,gy*S,C*S,C*S);
+    for(const [name,px,py] of (mq.matches ? PLACE : PLACE.concat(MORE))) SP[name].forEach((row,ry)=>[...row].forEach((ch,rx)=>{
+      if(ch===".") return; x.fillStyle=PAL[ch]; x.fillRect((Math.round(px*f)+rx*U)*S,(Math.round(py*f)+ry*U)*S,U*S,U*S);
+    }));
+    try{ document.body.style.backgroundImage=`url(${c.toDataURL()})`; document.body.style.backgroundSize=`${T}px ${T}px`; }catch(e){}
+  }
+  draw(); mq.addEventListener?.("change", draw);
+})();
+
+// ponytail: answers map to 4 types (w/n/s/g); ties go to the earlier type in KEYS order
+const SHARE_URL = PAGE_URL;
+const QS = [
+  ["주말 아침, 눈 뜨자마자 하고 싶은 건?", ["운동화 신고 동네 한 바퀴","동네 브런치 카페 가기","이불 속에서 조금 더 자기","사람 없는 공원 벤치에 앉기"]],
+  ["친구들 사이에서 나는?", ["늘 먼저 \"나가자\" 하는 사람","맛집 리스트 담당","같이 있으면 편한 사람","낯선 자리에서 친구 챙기는 사람"]],
+  ["여행 가면 나는?", ["하루 2만 보는 기본","숨은 맛집 찾아다니기","숙소에서 뒹굴기","사람 적은 곳으로 가기"]],
+  ["비 오는 날 나는?", ["우비 입고 그래도 나간다","단골 카페로 피신","낮잠이 최고","창밖 보며 따뜻한 차 한 잔"]],
+  ["친구가 겁먹었을 때 나는?", ["기분 풀리게 같이 걷는다","맛있는 거 먹으러 가자고 한다","말없이 옆에 있어 준다","앞에 서서 막아 준다"]],
+  ["나에게 반려견이란?", ["매일 함께 걷는 동반자","어디든 같이 가는 단짝","소파 옆자리 짝꿍","내가 지켜 줄 가족"]],
+];
+const TYPES = {
+  w:{name:"산책 메이트형", img:"img/lic-walk.jpg", pos:"center 20%", alt:"산책길 계단에서 정면을 바라보는 봉군이",
+     desc:"봉군이의 공식 산책 메이트로 임명되셨습니다. 봉군이 덕분에 임보자는 한 달 연속 걸음 수 상위 2%를 찍었어요. 운동화는 넉넉히 준비해 주세요.",
+     fact:"산책만렙이지만 한적한 길을 좋아해요"},
+  n:{name:"동네 마실 단짝형", img:"img/lic-town.jpg", pos:"center 25%", alt:"차 안에서 하네스를 하고 창밖을 보는 봉군이",
+     desc:"봉군이의 마실 단짝으로 선정되셨습니다. 봉군이는 차도 얌전히 잘 타고 동네 분들께 인사도 잘 해요. 조수석은 아마 봉군이 자리가 될 거예요.",
+     fact:"차를 잘 타요"},
+  s:{name:"소파 동지형", img:"img/lic-sofa.jpg", pos:"center 50%", alt:"베개에 얼굴을 묻고 쉬는 봉군이",
+     desc:"소파 동지로 정식 인정받으셨습니다. 봉군이는 정말로 손이 많이 안 가요. 베개 하나만 양보해 주시면 됩니다.",
+     fact:"8살 · 9.3kg · 베개 반띵 각오 필요"},
+  g:{name:"든든한 보디가드형", img:"img/lic-guard.jpg", pos:"center 22%", alt:"벽에 기대 카메라를 바라보는 봉군이",
+     desc:"봉군이 전담 경호원으로 발탁되셨습니다. 봉군이는 평소 뛰지 않는 양반이지만 다른 강아지 앞에서는 아주 빠르게 자취를 감춰요. 든든하게 앞에 서 주실 분을 찾고 있어요.",
+     fact:"다른 강아지는 무서워해요"},
+};
+const KEYS = ["w","n","s","g"], LET = ["A","B","C","D"];
+let i = 0, score = {w:0,n:0,s:0,g:0};
+const $ = id => document.getElementById(id);
+
+function show(){
+  $("count").textContent = `LV.${i+1}`;
+  $("blocks").innerHTML = QS.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("");
+  $("q").textContent = QS[i][0];
+  $("opts").innerHTML = "";
+  QS[i][1].forEach((t,k)=>{
+    const b = document.createElement("button");
+    b.type="button"; b.className="opt";
+    b.innerHTML = `<b>${LET[k]}</b><span></span>`; b.lastChild.textContent = t;
+    b.onclick = ()=>{ score[KEYS[k]]++; i++; i<QS.length ? show() : finish(); };
+    $("opts").appendChild(b);
+  });
+}
+let lastResult = "";
+function finish(){
+  const top = KEYS.reduce((a,b)=> score[b]>score[a]?b:a, "w");
+  showResult(top, 82 + score[top]*3); // 85~100
+}
+function showResult(top, pct){
+  const t = TYPES[top];
+  lastResult = `#result-${top}-${pct}`;
+  $("start").hidden = true; $("quiz").hidden = true; $("result").hidden = false; $("profileCta").hidden = true;
+  $("rType").textContent = t.name;
+  $("rPct").textContent = pct + "%";
+  const ph = $("rImg"); ph.style.backgroundImage = `url(${t.img})`; ph.style.backgroundPosition = t.pos; ph.setAttribute("aria-label", t.alt);
+  $("rDesc").textContent = t.desc;
+  $("rFact").textContent = "봉군이 TMI · " + t.fact;
+  $("rNo").textContent = "NO." + String(Math.floor(Math.random()*9000)+1000);
+  shareMsg = `나는 봉군이와 '${t.name}', 궁합 ${pct}%!\n가족을 기다리는 8살 봉군이와 너의 궁합도 확인해 봐 → ${SHARE_URL}`;
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+// ponytail: #licenses shows all four result cards at once, for the owner to review
+function preview(){
+  const on = location.hash === "#licenses";
+  $("preview").hidden = !on;
+  if (!on) return;
+  $("preview").innerHTML = '<span class="tag">LICENSE PREVIEW · 4</span>' + KEYS.map(k=>{
+    const t = TYPES[k];
+    return `<div class="license"><div class="top"><span>봉군이 산책 면허증</span><span>NO.0000</span></div>
+      <div class="body"><div class="photo" role="img" aria-label="${t.alt}" style="background-image:url(${t.img});background-position:${t.pos}"></div><div>
+      <div class="lbl">나와 봉군이는</div><h2 class="type">${t.name}</h2><div class="lbl">궁합 지수</div><div class="pct">100%</div></div></div>
+      <p class="desc">${t.desc}</p><div class="stamp"><span>봉군이 TMI · ${t.fact}</span></div></div>`;
+  }).join("");
+  $("preview").scrollIntoView({block:"start"});
+}
+addEventListener("hashchange", preview); preview();
+// 다른 브라우저로 넘어왔을 때(#result-w-94) 같은 결과를 다시 보여줘요
+{ const m = location.hash.match(/^#result-([wnsg])-(\d{2,3})$/); if (m) showResult(m[1], Math.min(100, +m[2])); }
+$("go").onclick = ()=>{ $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
+$("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
+</script>
+</body>
+</html>
