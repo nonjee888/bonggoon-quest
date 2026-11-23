@@ -254,13 +254,15 @@ async function startLicense(m){
     loaderClose(); toast.textContent = "이미지를 만들지 못했어요. 화면을 캡처해 주세요.";
   }
 }
-async function buildLicense(){
+// W×H canvas on pixel grass; topOnly keeps just the card's upper part (photo, type, %) for small thumbnails
+async function buildLicense(W=1080, H=1920, topOnly=false){
   const card = await html2canvas(document.querySelector("#result .license"), {scale:3, backgroundColor:null});
-  const W=1080, H=1920, c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
+  const c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
   x.fillStyle="#62B43A"; x.fillRect(0,0,W,H); x.fillStyle="#58A833";
   for(let gy=0;gy<H;gy+=40) for(let gx=0;gx<W;gx+=40) if(((gx+gy)/40)%2) x.fillRect(gx,gy,40,40);
-  const w=920, h=Math.min(card.height*w/card.width, H-160);
-  x.drawImage(card,(W-w)/2,(H-h)/2,w,h);
+  const sh = topOnly ? Math.min(card.height, card.width*1.35) : card.height;
+  const k = Math.min((W-80)/card.width, (H-80)/sh), w = card.width*k, h = sh*k;
+  x.drawImage(card,0,0,card.width,sh,(W-w)/2,(H-h)/2,w,h);
   // JPEG: Instagram's share target rejects some PNGs; fall back to dataURL if toBlob gives null (older iOS)
   let blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.92));
   if (!blob) blob = await (await fetch(c.toDataURL("image/jpeg",0.92))).blob();
@@ -321,7 +323,7 @@ async function shareFile(){
 }
 document.getElementById("saveImg").onclick = ()=>startLicense("save");
 document.getElementById("storyBtn").onclick = ()=>startLicense("story");
-document.getElementById("shareNow").onclick = shareFile;
+document.getElementById("shareNow").onclick = ()=> mode === "kakao" ? sendKakao() : shareFile();
 document.getElementById("loaderClose").onclick = loaderClose;
 
 // 로딩: 픽셀 다람쥐가 좌우로 뛰어다니며 도토리를 주워요
@@ -362,24 +364,43 @@ function loaderOpen(){
 }
 function loaderClose(){ LD.stop(); document.getElementById("loader").hidden = true; }
 
-// 카카오톡 공유: Kakao feed card when a key is set; otherwise copy the message so it can be pasted in KakaoTalk
-function shareKakao(){
+// 카카오톡 공유: the viewer's own license becomes the card thumbnail (uploaded to Kakao's image server).
+// Sending needs a fresh tap, so after the upload a [카카오톡으로 보내기] button appears. No key/SDK → copy the message.
+let kakaoImg = null, kakaoFor = "";
+function copyFallback(){
   const toast = document.getElementById("toast");
-  try{
-    if (KAKAO_JS_KEY && window.Kakao) {
-      if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY);
-      Kakao.Share.sendDefault({
-        objectType:"feed",
-        content:{ title:"나와 봉군이, 산책 궁합은 몇 %?", description: shareMsg.split("\n")[0],
-          imageUrl: new URL("img/apple.jpg", PAGE_URL).href, link:{mobileWebUrl:PAGE_URL, webUrl:PAGE_URL} },
-        buttons:[{ title:"나도 궁합 보기", link:{mobileWebUrl:PAGE_URL, webUrl:PAGE_URL} }],
-      });
-      return;
-    }
-  }catch(e){}
   navigator.clipboard?.writeText(shareMsg).then(
     ()=>{ toast.textContent = "공유 문구를 복사했어요. 카톡 대화방에 붙여 넣어 주세요."; },
     ()=>{ toast.textContent = shareMsg; });
+}
+function sendKakao(){
+  const img = kakaoImg || { url: new URL("img/apple.jpg", PAGE_URL).href, width: 1000, height: 1000 };
+  const link = PAGE_URL;
+  try{
+    Kakao.Share.sendDefault({
+      objectType:"feed",
+      content:{ title:"나와 봉군이, 산책 궁합은 몇 %?", description: shareMsg.split("\n")[0],
+        imageUrl: img.url, imageWidth: img.width, imageHeight: img.height, link:{mobileWebUrl:link, webUrl:link} },
+      buttons:[{ title:"나도 궁합 보기", link:{mobileWebUrl:link, webUrl:link} }],
+    });
+  }catch(e){ copyFallback(); }
+  loaderClose();
+}
+async function shareKakao(){
+  if (!KAKAO_JS_KEY || !window.Kakao) return copyFallback();
+  try{ if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY); }catch(e){ return copyFallback(); }
+  if (kakaoImg && kakaoFor === lastResult) return sendKakao();
+  mode = "kakao"; loaderOpen();
+  try{
+    const built = await Promise.all([buildLicense(800, 800, true), new Promise(r=>setTimeout(r,1400))]);
+    const file = new File([built[0]], "bonggoon-license.jpg", {type:"image/jpeg"});
+    const res = await Kakao.Share.uploadImage({ file: [file] });
+    const o = res.infos.original;
+    kakaoImg = { url:o.url, width:o.width, height:o.height }; kakaoFor = lastResult;
+  }catch(e){ kakaoImg = null; } // upload failed: send with the default photo instead
+  LD.stop(); document.getElementById("acorns").textContent = "";
+  setMsg("면허증이 완성됐어요!");
+  const btn = document.getElementById("shareNow"); btn.textContent = "카카오톡으로 보내기"; btn.hidden = false;
 }
 document.getElementById("kakao").onclick = shareKakao;
 

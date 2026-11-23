@@ -94,6 +94,80 @@ test.describe("카카오톡 앱 안에서 열었을 때", () => {
   });
 });
 
+// ── 인스타그램 연결 ─────────────────────────────────────────────
+// 실제 인스타 앱은 테스트할 수 없어서, 휴대폰 공유 창(navigator.share)을 가짜로 바꿔 무엇이 넘어가는지 확인해요.
+test.describe("인스타 스토리에 올리기 (휴대폰 브라우저)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__shared = [];
+      navigator.canShare = (d) => !!(d && d.files && d.files.length);
+      navigator.share = async (d) => { window.__shared.push(d.files.map((f) => ({ name: f.name, type: f.type, size: f.size }))); };
+    });
+  });
+
+  test("[인스타그램으로 보내기]를 누르면 면허증 JPEG 한 장이 공유 창으로 넘어간다", async ({ page }) => {
+    await page.goto("./");
+    await playQuiz(page, 0);
+    await page.getByRole("button", { name: "인스타 스토리에 올리기" }).click();
+    const btn = page.locator("#shareNow");
+    await expect(btn).toHaveText("인스타그램으로 보내기", { timeout: 15_000 });
+    await btn.click();
+    await expect(page.locator("#loader")).toBeHidden();
+    const shared = await page.evaluate(() => window.__shared);
+    expect(shared).toHaveLength(1);
+    expect(shared[0]).toEqual([expect.objectContaining({ name: "bonggoon-license.jpg", type: "image/jpeg" })]);
+    expect(shared[0][0].size).toBeGreaterThan(20_000);
+  });
+});
+
+test.describe("인스타 스토리에 올리기 (인스타그램 앱 안)", () => {
+  test.use({ userAgent: "Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36 Instagram 350.0.0" });
+
+  test("꾹 눌러 저장 안내와 [인스타그램 열기](스토리 카메라) 링크가 나온다", async ({ page }) => {
+    await page.goto("./");
+    await playQuiz(page, 1);
+    await page.getByRole("button", { name: "인스타 스토리에 올리기" }).click();
+    await expect(page.locator("#readyImg")).toBeVisible({ timeout: 15_000 });
+    const link = page.locator("#openExternal");
+    await expect(link).toHaveText("인스타그램 열기");
+    await expect(link).toHaveAttribute("href", "instagram://story-camera");
+  });
+});
+
+// ── 카카오톡 공유 ───────────────────────────────────────────────
+// 카카오 SDK는 등록된 도메인에서만 작동해서, 테스트에서는 가짜 SDK로 바꿔 무엇을 보내는지 확인해요.
+test.describe("카카오톡으로 공유하기", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/kakao_js_sdk/**", (route) => route.fulfill({
+      contentType: "application/javascript",
+      body: `window.__kakao = { uploads: [], sent: [] };
+        window.Kakao = { _init:false, init(){ this._init=true; }, isInitialized(){ return this._init; },
+          Share: {
+            async uploadImage({ file }) { const f = file[0]; window.__kakao.uploads.push({ name:f.name, type:f.type, size:f.size });
+              return { infos: { original: { url: "https://k.kakaocdn.net/test/license.jpg", width: 800, height: 800 } } }; },
+            sendDefault(o) { window.__kakao.sent.push(o); } } };`,
+    }));
+  });
+
+  test("내 결과 면허증 이미지가 카톡 카드 썸네일로 들어간다", async ({ page }) => {
+    await page.goto("./");
+    await playQuiz(page, 3);
+    await page.getByRole("button", { name: "카카오톡으로 공유하기" }).click();
+    const btn = page.locator("#shareNow");
+    await expect(btn).toHaveText("카카오톡으로 보내기", { timeout: 15_000 });
+    await btn.click();
+    const k = await page.evaluate(() => window.__kakao);
+    expect(k.uploads).toHaveLength(1);
+    expect(k.uploads[0].type).toBe("image/jpeg");
+    expect(k.sent).toHaveLength(1);
+    const c = k.sent[0].content;
+    expect(c.imageUrl).toBe("https://k.kakaocdn.net/test/license.jpg");
+    expect(c.description).toContain("든든한 보디가드형");
+    expect(c.description).toContain("100%");
+    expect(c.link.mobileWebUrl).toMatch(/^http:\/\/127\.0\.0\.1:4173\/$/);
+  });
+});
+
 test("다른 브라우저로 넘어온 주소(#result-…)로 열면 같은 결과가 바로 보인다", async ({ page }) => {
   await page.goto("./#result-g-97");
   await expect(page.locator("#result")).toBeVisible();
