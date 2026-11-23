@@ -81,6 +81,8 @@ test.describe("카카오톡 앱 안에서 열었을 때", () => {
   test.use({ userAgent: "Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36 KAKAOTALK 10.9.0" });
 
   test("저장하면 꾹 눌러 저장 화면과 [다른 브라우저로 열기]가 나온다", async ({ page }) => {
+    // 처음 열 때 자동으로 다른 브라우저로 넘기는 동작은 테스트 브라우저에서 멈추므로, 이미 한 번 넘긴 상태로 시작해요
+    await page.addInitScript(() => sessionStorage.setItem("ext", "1"));
     await page.goto("./");
     await playQuiz(page, 3);
     await page.getByRole("button", { name: "면허증 이미지 저장하기" }).click();
@@ -90,7 +92,7 @@ test.describe("카카오톡 앱 안에서 열었을 때", () => {
     await expect(link).toHaveText("다른 브라우저로 열기");
     const href = await link.getAttribute("href");
     expect(href).toMatch(/^kakaotalk:\/\/web\/openExternal\?url=/);
-    expect(decodeURIComponent(href)).toContain("#result-g-100"); // 넘어가도 같은 결과
+    expect(decodeURIComponent(href)).toContain("?result=g-100"); // 넘어가도 같은 결과
   });
 });
 
@@ -120,8 +122,23 @@ test.describe("인스타 스토리에 올리기 (휴대폰 브라우저)", () =>
   });
 });
 
-test.describe("인스타 스토리에 올리기 (인스타그램 앱 안)", () => {
+test.describe("인스타 스토리에 올리기 (안드로이드 인스타그램 앱 안)", () => {
   test.use({ userAgent: "Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36 Instagram 350.0.0" });
+
+  test("[크롬으로 열기]로 같은 결과를 크롬에서 열 수 있다", async ({ page }) => {
+    await page.goto("./");
+    await playQuiz(page, 1);
+    await page.getByRole("button", { name: "인스타 스토리에 올리기" }).click();
+    await expect(page.locator("#readyImg")).toBeVisible({ timeout: 15_000 });
+    const link = page.locator("#openExternal");
+    await expect(link).toHaveText("크롬으로 열기");
+    const href = await link.getAttribute("href");
+    expect(href).toMatch(/^intent:\/\/127\.0\.0\.1:4173\/\?result=n-100#Intent;scheme=https;package=com\.android\.chrome;end$/);
+  });
+});
+
+test.describe("인스타 스토리에 올리기 (아이폰 인스타그램 앱 안)", () => {
+  test.use({ userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0.0" });
 
   test("꾹 눌러 저장 안내와 [인스타그램 열기](스토리 카메라) 링크가 나온다", async ({ page }) => {
     await page.goto("./");
@@ -174,6 +191,12 @@ test("다른 브라우저로 넘어온 주소(#result-…)로 열면 같은 결�
   await expect(page.locator("#rType")).toHaveText("든든한 보디가드형");
   await expect(page.locator("#rPct")).toHaveText("97%");
   await expect(page.locator("#start")).toBeHidden();
+});
+
+test("브라우저로 넘어온 주소(?result=…)로 열어도 같은 결과가 보인다", async ({ page }) => {
+  await page.goto("./?result=w-91");
+  await expect(page.locator("#rType")).toHaveText("산책 메이트형");
+  await expect(page.locator("#rPct")).toHaveText("91%");
 });
 
 test("#licenses 미리보기에 면허증 4장이 나온다", async ({ page }) => {

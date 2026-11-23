@@ -235,7 +235,16 @@ let shareMsg = "";
 // The phone share sheet needs a fresh tap, so sharing happens from a button shown after the image is ready.
 let readyBlob = null, readyFor = "", mode = "save";
 const UA = navigator.userAgent, IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA), IS_IOS = /iPhone|iPad|iPod/i.test(UA),
-      IN_KAKAO = /KAKAOTALK/i.test(UA), IN_APP = /KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line\//i.test(UA);
+      IS_ANDROID = /Android/i.test(UA), IN_KAKAO = /KAKAOTALK/i.test(UA), IN_APP = /KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line\//i.test(UA);
+// 앱 안 브라우저(카톡·인스타 등)는 저장·공유 창이 막혀 있어요. 진짜 브라우저로 넘길 주소 (결과는 ?result= 로 이어받아요)
+function externalUrl(){
+  const r = (lastResult || "").replace("#result-", "");
+  const u = PAGE_URL + (r ? "?result=" + r : "");
+  if (IN_KAKAO) return "kakaotalk://web/openExternal?url=" + encodeURIComponent(u);
+  if (IS_ANDROID) return "intent://" + u.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
+  return "";
+}
+const EXT_LABEL = IN_KAKAO ? "다른 브라우저로 열기" : "크롬으로 열기";
 const licFile = () => new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
 const canShareFile = () => !IN_APP && !!navigator.canShare?.({files:[licFile()]});
 
@@ -290,8 +299,9 @@ function loaderDone(){
   const btn = document.getElementById("shareNow");
   if (mode === "save") {
     if (IN_APP) {
-      showImage("면허증이 완성됐어요! 이미지를 꾹 눌러 사진첩에 저장해 주세요.");
-      if (IN_KAKAO) showLink("다른 브라우저로 열기", "kakaotalk://web/openExternal?url=" + encodeURIComponent(PAGE_URL + lastResult));
+      showImage(externalUrl() ? "이 앱 안에서는 바로 저장이 안 돼요. 아래 버튼으로 브라우저에서 열거나, 이미지를 꾹 눌러 저장해 주세요."
+                              : "이 앱 안에서는 바로 저장이 안 돼요. 이미지를 꾹 눌러 저장하거나, 오른쪽 위 ⋯ 메뉴에서 '외부 브라우저로 열기'를 눌러 주세요.");
+      if (externalUrl()) showLink(EXT_LABEL, externalUrl());
     } else if (IS_IOS && canShareFile()) {
       setMsg("면허증이 완성됐어요! 다음 화면에서 '이미지 저장'을 눌러 주세요.");
       btn.textContent = "사진첩에 저장하기"; btn.hidden = false;
@@ -302,6 +312,9 @@ function loaderDone(){
     if (canShareFile()) {
       setMsg("면허증이 완성됐어요! 다음 화면에서 인스타그램 → 스토리를 골라 주세요.");
       btn.textContent = "인스타그램으로 보내기"; btn.hidden = false;
+    } else if (IN_APP && externalUrl()) {
+      showImage("이 앱 안에서는 인스타로 바로 보낼 수 없어요. 아래 버튼으로 브라우저에서 열면 바로 보낼 수 있어요.");
+      showLink(EXT_LABEL, externalUrl());
     } else if (IS_MOBILE) {
       showImage("이미지를 꾹 눌러 저장한 뒤, 인스타그램 스토리에서 이 사진을 골라 주세요.");
       showLink("인스타그램 열기", "instagram://story-camera");
@@ -510,7 +523,10 @@ function preview(){
 }
 addEventListener("hashchange", preview); preview();
 // 다른 브라우저로 넘어왔을 때(#result-w-94) 같은 결과를 다시 보여줘요
-{ const m = location.hash.match(/^#result-([wnsg])-(\d{2,3})$/); if (m) showResult(m[1], Math.min(100, +m[2])); }
+{ const m = location.hash.match(/^#result-([wnsg])-(\d{2,3})$/) || location.search.match(/[?&]result=([wnsg])-(\d{2,3})/);
+  if (m) showResult(m[1], Math.min(100, +m[2])); }
+// 카톡 안에서 열리면 처음부터 진짜 브라우저로 넘겨요 (한 번만)
+if (IN_KAKAO) { try{ if (!sessionStorage.getItem("ext")) { sessionStorage.setItem("ext","1"); location.href = externalUrl(); } }catch(e){} }
 $("go").onclick = ()=>{ $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 $("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 </script>
