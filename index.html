@@ -159,7 +159,8 @@ p{margin:0}
       <span class="tag">SHARE</span>
       <h2 class="panel-h">봉군이 소식을 퍼뜨려 주세요</h2>
       <p class="small">봉군이는 평생 가족을 기다리는 8살 남자 강아지예요. 결과를 공유해 주시면 봉군이가 가족을 더 빨리 찾을 수 있어요.</p>
-      <button class="btn" id="saveImg" type="button">면허증 저장 · 인스타 스토리</button>
+      <button class="btn alt" id="saveImg" type="button">면허증 이미지 저장하기</button>
+      <button class="btn" id="storyBtn" type="button">인스타 스토리에 올리기</button>
       <span class="toast" id="saveToast" role="status"></span>
       <button class="btn kakao" id="kakao" type="button">카카오톡으로 공유하기</button>
       <span class="toast" id="toast" role="status"></span>
@@ -215,7 +216,7 @@ p{margin:0}
       <p id="acorns" class="small" aria-live="polite"></p>
       <img id="readyImg" hidden alt="완성된 봉군이 산책 면허증" style="width:100%;max-height:60vh;object-fit:contain;background:var(--ink);border:3px solid var(--ink);-webkit-touch-callout:default">
       <a class="btn alt" id="openExternal" hidden>다른 브라우저로 열기</a>
-      <button class="btn" id="shareNow" type="button" hidden>스토리에 공유하기 · 저장하기</button>
+      <button class="btn" id="shareNow" type="button" hidden></button>
       <button class="btn alt" id="loaderClose" type="button">닫기</button>
     </div>
   </div>
@@ -229,68 +230,97 @@ const KAKAO_JS_KEY = "6fa94330683a60c696fe08b1c50fe356";
 
 const PAGE_URL = location.origin + location.pathname;
 let shareMsg = "";
-// 면허증 저장: render the license card onto a 1080x1920 story-sized canvas, then open the phone's share sheet (or download on PC)
-async function saveLicense(){
-  const toast = document.getElementById("saveToast");
-  if(!window.html2canvas){ toast.textContent = "지금은 저장할 수 없어요. 캡처해서 올려 주세요."; return; }
-  toast.textContent = "";
+// 면허증 이미지: render the license onto a 1080x1920 story canvas, cached per result.
+// Two separate actions: "save" (keep the image) and "story" (hand it to Instagram).
+// The phone share sheet needs a fresh tap, so sharing happens from a button shown after the image is ready.
+let readyBlob = null, readyFor = "", mode = "save";
+const UA = navigator.userAgent, IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA), IS_IOS = /iPhone|iPad|iPod/i.test(UA),
+      IN_KAKAO = /KAKAOTALK/i.test(UA), IN_APP = /KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line\//i.test(UA);
+const licFile = () => new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
+const canShareFile = () => !IN_APP && !!navigator.canShare?.({files:[licFile()]});
+
+async function startLicense(m){
+  mode = m;
+  const toast = document.getElementById("saveToast"); toast.textContent = "";
+  if(!window.html2canvas){ toast.textContent = "지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요."; return; }
   loaderOpen();
   try{
-    const built = await Promise.all([buildLicense(), new Promise(r=>setTimeout(r,1400))]);
-    readyBlob = built[0];
+    if (!readyBlob || readyFor !== lastResult) {
+      const built = await Promise.all([buildLicense(), new Promise(r=>setTimeout(r,1400))]);
+      readyBlob = built[0]; readyFor = lastResult;
+    } else await new Promise(r=>setTimeout(r,600));
     loaderDone();
   }catch(e){
-    loaderClose();
-    toast.textContent = "저장하지 못했어요. 캡처해서 올려 주세요.";
+    loaderClose(); toast.textContent = "이미지를 만들지 못했어요. 화면을 캡처해 주세요.";
   }
 }
 async function buildLicense(){
-    const card = await html2canvas(document.querySelector("#result .license"), {scale:3, backgroundColor:null});
-    const W=1080, H=1920, c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
-    x.fillStyle="#62B43A"; x.fillRect(0,0,W,H); x.fillStyle="#58A833";
-    for(let gy=0;gy<H;gy+=40) for(let gx=0;gx<W;gx+=40) if(((gx+gy)/40)%2) x.fillRect(gx,gy,40,40);
-    const w=920, h=Math.min(card.height*w/card.width, H-160);
-    x.drawImage(card,(W-w)/2,(H-h)/2,w,h);
-    // JPEG: Instagram's share target rejects some PNGs; fall back to dataURL if toBlob gives null (older iOS)
-    let blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.92));
-    if (!blob) blob = await (await fetch(c.toDataURL("image/jpeg",0.92))).blob();
-    return blob;
+  const card = await html2canvas(document.querySelector("#result .license"), {scale:3, backgroundColor:null});
+  const W=1080, H=1920, c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
+  x.fillStyle="#62B43A"; x.fillRect(0,0,W,H); x.fillStyle="#58A833";
+  for(let gy=0;gy<H;gy+=40) for(let gx=0;gx<W;gx+=40) if(((gx+gy)/40)%2) x.fillRect(gx,gy,40,40);
+  const w=920, h=Math.min(card.height*w/card.width, H-160);
+  x.drawImage(card,(W-w)/2,(H-h)/2,w,h);
+  // JPEG: Instagram's share target rejects some PNGs; fall back to dataURL if toBlob gives null (older iOS)
+  let blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.92));
+  if (!blob) blob = await (await fetch(c.toDataURL("image/jpeg",0.92))).blob();
+  return blob;
 }
-// ponytail: share runs from its own tap — the phone share sheet needs a fresh user gesture, which a long render would lose
-let readyBlob = null;
-// In-app browsers (KakaoTalk, Instagram) can't download blob files ("지원하지 않는 형식") and lack the share sheet,
-// so on phones we show the finished image to long-press-save instead.
-const UA = navigator.userAgent, IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA), IN_KAKAO = /KAKAOTALK/i.test(UA);
-function showLongPress(){
+function setMsg(t){ document.getElementById("loaderMsg").textContent = t; }
+function showImage(msg){
   const img = document.getElementById("readyImg");
   img.src = URL.createObjectURL(readyBlob); img.hidden = false;
-  document.getElementById("sq").hidden = true; document.getElementById("acorns").textContent = "";
+  document.getElementById("sq").hidden = true;
   document.getElementById("shareNow").hidden = true;
-  document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요! 이미지를 꾹 눌러 사진첩에 저장해 주세요.";
-  if (IN_KAKAO) { const a = document.getElementById("openExternal");
-    a.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(PAGE_URL + lastResult); a.hidden = false; }
+  setMsg(msg);
 }
-async function shareReady(){
-  const toast = document.getElementById("saveToast");
-  const file = new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
-  if (navigator.canShare?.({files:[file]})) {
-    try{
-      await navigator.share({files:[file]});
-      loaderClose(); toast.textContent = "공유 창을 열었어요. 인스타그램 스토리를 골라 주세요.";
-    }catch(e){
-      if (e && e.name==="AbortError") { loaderClose(); toast.textContent = "공유를 취소했어요."; }
-      else showLongPress();
+function showLink(text, href){ const a = document.getElementById("openExternal"); a.textContent = text; a.href = href; a.hidden = false; }
+function downloadNow(){
+  const a = document.createElement("a"); a.href = URL.createObjectURL(readyBlob); a.download = "bonggoon-license.jpg";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+}
+// Pick what this browser can really do, and name the button after it
+function loaderDone(){
+  LD.stop(); document.getElementById("acorns").textContent = "";
+  const btn = document.getElementById("shareNow");
+  if (mode === "save") {
+    if (IN_APP) {
+      showImage("면허증이 완성됐어요! 이미지를 꾹 눌러 사진첩에 저장해 주세요.");
+      if (IN_KAKAO) showLink("다른 브라우저로 열기", "kakaotalk://web/openExternal?url=" + encodeURIComponent(PAGE_URL + lastResult));
+    } else if (IS_IOS && canShareFile()) {
+      setMsg("면허증이 완성됐어요! 다음 화면에서 '이미지 저장'을 눌러 주세요.");
+      btn.textContent = "사진첩에 저장하기"; btn.hidden = false;
+    } else {
+      downloadNow();
+      setMsg(IS_MOBILE ? "면허증을 저장했어요! 갤러리나 다운로드 폴더에서 볼 수 있어요." : "면허증 이미지를 저장했어요!");
     }
-  } else if (IS_MOBILE) {
-    showLongPress();
   } else {
-    const a = document.createElement("a"); a.href = URL.createObjectURL(readyBlob); a.download = file.name;
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-    loaderClose(); toast.textContent = "저장했어요! 인스타그램에서 스토리에 올려 주세요.";
+    if (canShareFile()) {
+      setMsg("면허증이 완성됐어요! 다음 화면에서 인스타그램 → 스토리를 골라 주세요.");
+      btn.textContent = "인스타그램으로 보내기"; btn.hidden = false;
+    } else if (IS_MOBILE) {
+      showImage("이미지를 꾹 눌러 저장한 뒤, 인스타그램 스토리에서 이 사진을 골라 주세요.");
+      showLink("인스타그램 열기", "instagram://story-camera");
+    } else {
+      downloadNow();
+      setMsg("이미지를 저장했어요! 휴대폰 인스타그램 스토리에 올려 주세요.");
+    }
   }
 }
-document.getElementById("saveImg").onclick = saveLicense;
-document.getElementById("shareNow").onclick = shareReady;
+async function shareFile(){
+  const toast = document.getElementById("saveToast");
+  try{
+    await navigator.share({files:[licFile()]});
+    loaderClose();
+    toast.textContent = mode === "story" ? "인스타그램에서 스토리에 올려 주세요." : "";
+  }catch(e){
+    if (e && e.name === "AbortError") loaderClose();
+    else showImage("이미지를 꾹 눌러 사진첩에 저장해 주세요.");
+  }
+}
+document.getElementById("saveImg").onclick = ()=>startLicense("save");
+document.getElementById("storyBtn").onclick = ()=>startLicense("story");
+document.getElementById("shareNow").onclick = shareFile;
 document.getElementById("loaderClose").onclick = loaderClose;
 
 // 로딩: 픽셀 다람쥐가 좌우로 뛰어다니며 도토리를 주워요
@@ -328,20 +358,6 @@ function loaderOpen(){
   document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true;
   document.getElementById("sq").hidden = false;
   document.getElementById("loader").hidden = false; LD.start();
-}
-// Pick the one action this browser can really do, and name the button after it
-function loaderDone(){
-  const file = new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
-  const btn = document.getElementById("shareNow");
-  if (navigator.canShare?.({files:[file]})) {
-    document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요!";
-    btn.textContent = "인스타 스토리에 공유하기"; btn.hidden = false;
-  } else if (IS_MOBILE) {
-    showLongPress();
-  } else {
-    document.getElementById("loaderMsg").textContent = "면허증이 완성됐어요!";
-    btn.textContent = "이미지 저장하기"; btn.hidden = false;
-  }
 }
 function loaderClose(){ LD.stop(); document.getElementById("loader").hidden = true; }
 
