@@ -274,10 +274,13 @@ function showImage(msg){
   document.getElementById("shareNow").hidden = true;
   setMsg(msg);
 }
-function showLink(text, href){ const a = document.getElementById("openExternal"); a.textContent = text; a.href = href; a.hidden = false; }
-function downloadNow(){
-  const a = document.createElement("a"); a.href = URL.createObjectURL(readyBlob); a.download = "bonggoon-license.jpg";
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+function showLink(text, href, download){ const a = document.getElementById("openExternal"); a.textContent = text; a.href = href;
+  if (download) a.setAttribute("download", download); else a.removeAttribute("download"); a.hidden = false; }
+// ponytail: a real <a download> with a data: URL, tapped by the viewer — Android browsers fail scripted blob downloads ("저장에 실패했습니다")
+function offerDownload(msg){
+  const r = new FileReader();
+  r.onload = ()=>{ setMsg(msg); showLink("사진 저장하기", r.result, "bonggoon-license.jpg"); document.getElementById("openExternal").className = "btn"; };
+  r.readAsDataURL(readyBlob);
 }
 // Pick what this browser can really do, and name the button after it
 function loaderDone(){
@@ -291,8 +294,7 @@ function loaderDone(){
       setMsg("면허증이 완성됐어요! 다음 화면에서 '이미지 저장'을 눌러 주세요.");
       btn.textContent = "사진첩에 저장하기"; btn.hidden = false;
     } else {
-      downloadNow();
-      setMsg(IS_MOBILE ? "면허증을 저장했어요! 갤러리나 다운로드 폴더에서 볼 수 있어요." : "면허증 이미지를 저장했어요!");
+      offerDownload("면허증이 완성됐어요! 아래 버튼을 눌러 저장해 주세요.");
     }
   } else {
     if (canShareFile()) {
@@ -302,8 +304,7 @@ function loaderDone(){
       showImage("이미지를 꾹 눌러 저장한 뒤, 인스타그램 스토리에서 이 사진을 골라 주세요.");
       showLink("인스타그램 열기", "instagram://story-camera");
     } else {
-      downloadNow();
-      setMsg("이미지를 저장했어요! 휴대폰 인스타그램 스토리에 올려 주세요.");
+      offerDownload("이미지를 저장한 뒤 휴대폰 인스타그램 스토리에 올려 주세요.");
     }
   }
 }
@@ -355,7 +356,7 @@ const LD = (()=>{
 function loaderOpen(){
   document.getElementById("loaderMsg").textContent = "면허증을 만드는 중이에요...";
   document.getElementById("shareNow").hidden = true;
-  document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true;
+  document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true; document.getElementById("openExternal").className = "btn alt";
   document.getElementById("sq").hidden = false;
   document.getElementById("loader").hidden = false; LD.start();
 }
