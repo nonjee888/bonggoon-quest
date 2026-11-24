@@ -489,17 +489,26 @@ document.getElementById("kakao").onclick = shareKakao;
   // ponytail: two sizes only — phone (f=0.8: small, dense tile) and monitor (f=2); positions are in f=1 units, tile = 30 checker cells so it repeats seamlessly
   const mq = matchMedia("(min-width: 700px)");
   function draw(){
-    const f = mq.matches ? 2 : 0.8, C=Math.round(14*f), T=C*30, U=Math.round(5*f), S=2, c=document.createElement("canvas");
-    c.width=c.height=T*S; const x=c.getContext("2d");
-    x.fillStyle="#62B43A"; x.fillRect(0,0,T*S,T*S); x.fillStyle="#58A833";
-    for(let gy=0;gy<T;gy+=C) for(let gx=0;gx<T;gx+=C) if(((gx+gy)/C)%2) x.fillRect(gx*S,gy*S,C*S,C*S);
-    // "pc" sprites are desktop-only (phone shows 1 봉군이 per tile, desktop 3)
-    for(const [name,px,py,sc] of (mq.matches ? PLACE : PLACE.filter(p=>p[4]!=="pc").concat(MORE))) { const u = Math.max(2, Math.round(U*(sc||1)));
-      SP[name].forEach((row,ry)=>[...row].forEach((ch,rx)=>{
-      if(ch===".") return; x.fillStyle=PAL[ch]; x.fillRect((Math.round(px*f)+rx*u)*S,(Math.round(py*f)+ry*u)*S,u*S,u*S);
-    })); }
-    try{ document.body.style.backgroundImage=`url(${c.toDataURL()})`; document.body.style.backgroundSize=`${T}px ${T}px`; }catch(e){}
+    const desk = mq.matches, f = desk ? 2 : 0.8, C=Math.round(14*f), T=C*30, U=Math.round(5*f), S=2;
+    // phone: one tile as wide as the screen and 3 patterns tall, so the few 봉군이 can sit at different
+    // left/right/middle spots instead of lining up in a column every 336px
+    const TW = desk ? T : Math.max(320, Math.round(innerWidth)), TH = desk ? T : T*3;
+    const c=document.createElement("canvas"); c.width=TW*S; c.height=TH*S; const x=c.getContext("2d");
+    x.fillStyle="#62B43A"; x.fillRect(0,0,TW*S,TH*S); x.fillStyle="#58A833";
+    for(let gy=0;gy<TH;gy+=C) for(let gx=0;gx<TW;gx+=C) if(((gx+gy)/C)%2) x.fillRect(gx*S,gy*S,C*S,C*S);
+    const put = (name, X, Y, u) => SP[name].forEach((row,ry)=>[...row].forEach((ch,rx)=>{
+      if(ch===".") return; x.fillStyle=PAL[ch]; x.fillRect((X+rx*u)*S,(Y+ry*u)*S,u*S,u*S); }));
+    const list = desk ? PLACE : PLACE.concat(MORE).filter(p=>p[0]!=="bong");
+    for (let oy=0; oy<TH; oy+=T) for (let ox=0; ox<TW; ox+=T)
+      for (const [name,px,py,sc] of list) put(name, ox+Math.round(px*f), oy+Math.round(py*f), Math.max(2, Math.round(U*(sc||1))));
+    if (!desk) { // 봉군이 4마리를 화면 곳곳에 흩어 놓기 (왼쪽 가장자리, 오른쪽 가장자리, 카드 사이 틈)
+      const R = TW-34;
+      [[2, .07*TH], [R, .3*TH], [Math.round(TW*.55), .52*TH], [2, .78*TH]]
+        .forEach(([X,Y]) => put("bong", X, Math.round(Y), 2));
+    }
+    try{ document.body.style.backgroundImage=`url(${c.toDataURL()})`; document.body.style.backgroundSize=`${TW}px ${TH}px`; }catch(e){}
   }
+  let rt=0; addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(!mq.matches) draw(); }, 300); });
   draw(); mq.addEventListener?.("change", draw);
 })();
 
