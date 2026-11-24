@@ -104,7 +104,6 @@ p{margin:0}
 .gnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 .gbtn{appearance:none;cursor:pointer;font-family:var(--display);font-size:20px;color:var(--ink);background:var(--sign-hi);border:3px solid var(--ink);
   box-shadow:inset -4px -4px 0 var(--sign-lo);width:52px;height:44px}
-.gbtn:disabled{opacity:.35;cursor:default}
 .gbtn:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
 .gcount{font-family:var(--pixel);font-size:12px}
 .divider{height:12px;margin-top:22px;background:repeating-linear-gradient(90deg,var(--grass-dark) 0 14px,transparent 14px 22px)}
@@ -462,7 +461,8 @@ document.getElementById("kakao").onclick = shareKakao;
 // 픽셀 풀밭 패턴: sprites drawn once onto a 420px tile and used as the body background
 (function meadow(){
   const PAL={r:"#E2384D",d:"#A3203A",g:"#3E8E2A",l:"#2F6B1C",p:"#FF8FB1",P:"#E2577F",o:"#8A5A33",y:"#E8C25A",Y:"#C9A03A",
-             b:"#B06A2E",B:"#7A4418",k:"#2B1D10",w:"#F4E3B5",W:"#FFFFFF",n:"#F7A1B5"};
+             b:"#B06A2E",B:"#7A4418",k:"#2B1D10",w:"#F4E3B5",W:"#FFFFFF",n:"#F7A1B5",
+    "0":"#3B2414","1":"#8A4A1E","2":"#C9772F","3":"#E9A55A","4":"#FFF4E0","5":"#1A1008","7":"#FF8FA0","8":"#D7263D","9":"#C9CED6"};
   const SP={
     rose:["..rrr...",".rrdrr..","rrdrdrr.",".rdddr..","..rrr...","...g....",".l.g....",".llg....","...g.l..","...gll.."],
     tulip:[".p.p.p.",".ppPpp.",".ppPpp.","..pPp..","...g...",".l.g.l.",".llgll.","...g..."],
@@ -470,11 +470,13 @@ document.getElementById("kakao").onclick = shareKakao;
     barley:["..y..",".yYy.",".yYy.",".yYy.","..Y..","..g..","..g..",".lg..","..g.."],
     squirrel:[".BB.......","BbbB..bb..","BbbB.bbbb.",".BbbBbkbb.","..BbbbbbB.","...bbbww..","...bbbww..","..bb..bb.."],
     skunk:["wk........","kwk..kk...","kwwk.kkk..",".kwwkkkwk.","..kwwwwkk.","...kkkkk..","...k..k..."],
+    // 봉군이 (same character as the favicon)
+    bong:[".....000000.....","...0033333300...","..010333333010..",".01123333332110.",".01122333322110.",".01125233252110.",".01122233222110.","..012244442210..","..012445544210..","...0244774420...","...0888888880...","..022289982220..","..022449944220..","..022444444220..","...0000000000..."],
     rabbit:[".W.W..",".W.W..",".WnW..","WWWWW.","WkWWW.","WWWWWW",".WWWWW",".W..W."],
   };
-  const PLACE=[["rose",27,39],["rabbit",225,21],["barley",354,126],["sprout",129,144],["squirrel",45,240],["tulip",279,225],["skunk",156,339],["sprout",369,354]];
+  const PLACE=[["rose",27,39],["rabbit",225,21],["barley",354,126],["sprout",129,144],["squirrel",45,240],["tulip",279,225],["skunk",156,339],["sprout",369,354],["bong",250,282]];
   // phone only: extra sprites in the gaps so the dense tile shows more
-  const MORE=[["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["rose",330,272],["barley",240,290],["tulip",60,345],["rabbit",290,370]];
+  const MORE=[["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["tulip",60,345],["rabbit",290,370]];
   // ponytail: two sizes only — phone (f=0.8: small, dense tile) and monitor (f=2); positions are in f=1 units, tile = 30 checker cells so it repeats seamlessly
   const mq = matchMedia("(min-width: 700px)");
   function draw(){
@@ -576,13 +578,17 @@ $("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; $("result").hidden=true
 (function gallery(){
   const tr = document.getElementById("track"), n = tr.children.length;
   const idx = () => Math.round(tr.scrollLeft / tr.clientWidth);
-  const go = (k) => tr.scrollTo({ left: Math.max(0, Math.min(n-1, k)) * tr.clientWidth });
-  function sync(){ const i = idx();
-    document.getElementById("gCount").textContent = `${i+1} / ${n}`;
-    document.getElementById("gPrev").disabled = i === 0; document.getElementById("gNext").disabled = i === n-1; }
-  document.getElementById("gPrev").onclick = () => go(idx()-1);
-  document.getElementById("gNext").onclick = () => go(idx()+1);
-  tr.addEventListener("keydown", (e) => { if (e.key==="ArrowRight") go(idx()+1); if (e.key==="ArrowLeft") go(idx()-1); });
+  // wraps around: after the last photo comes the first, before the first comes the last
+  const go = (k) => tr.scrollTo({ left: ((k % n) + n) % n * tr.clientWidth });
+  function sync(){ document.getElementById("gCount").textContent = `${idx()+1} / ${n}`; }
+  // 3초마다 자동으로 넘어가요. 사용자가 넘기거나 만지면 그때부터 다시 3초를 세요. 화면이 안 보일 때는 멈춰요.
+  let timer = 0;
+  const restart = () => { clearInterval(timer); timer = setInterval(() => { if (!document.hidden) go(idx()+1); }, 3000); };
+  document.getElementById("gPrev").onclick = () => { go(idx()-1); restart(); };
+  document.getElementById("gNext").onclick = () => { go(idx()+1); restart(); };
+  tr.addEventListener("keydown", (e) => { if (e.key==="ArrowRight") go(idx()+1); if (e.key==="ArrowLeft") go(idx()-1); restart(); });
+  ["pointerdown","touchstart","wheel"].forEach((ev) => tr.addEventListener(ev, restart, {passive:true}));
+  restart();
   tr.addEventListener("scroll", () => requestAnimationFrame(sync), {passive:true});
   sync();
 })();

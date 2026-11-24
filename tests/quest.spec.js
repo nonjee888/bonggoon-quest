@@ -227,7 +227,10 @@ test("프로필 사진 캐러셀: [▶]로 넘기고 [◀]로 돌아온다", asy
   await expect(count).toHaveText(/^1 \/ \d+$/);
   const total = Number((await count.textContent()).split("/")[1]);
   expect(total).toBeGreaterThanOrEqual(10);
-  await expect(page.locator("#gPrev")).toBeDisabled();
+  await page.locator("#gPrev").click(); // 첫 장에서 이전 → 마지막 장
+  await expect(count).toHaveText(`${total} / ${total}`);
+  await page.locator("#gNext").click(); // 마지막 장에서 다음 → 첫 장
+  await expect(count).toHaveText(`1 / ${total}`);
   await page.locator("#gNext").click();
   await expect(count).toHaveText(`2 / ${total}`);
   await page.locator("#gNext").click();
@@ -243,4 +246,11 @@ test("프로필 사진 캐러셀: [▶]로 넘기고 [◀]로 돌아온다", asy
 test("시작 버튼 아래에 구분선이 있다", async ({ page }) => {
   await page.goto("./");
   await expect(page.locator("#start .divider")).toBeVisible();
+});
+
+test("캐러셀은 가만히 두면 3초 뒤 다음 사진으로 넘어간다", async ({ page }) => {
+  await page.goto("./");
+  const count = page.locator("#gCount");
+  await expect(count).toHaveText(/^1 \//);
+  await expect(count).toHaveText(/^2 \//, { timeout: 5_000 });
 });
