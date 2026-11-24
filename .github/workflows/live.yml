@@ -1,0 +1,37 @@
+name: 배포 후 실제 사이트 테스트
+
+# GitHub Pages 배포가 끝나면 진짜 주소(github.io)에 같은 테스트를 한 번 더 돌려요
+on:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  live:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04  # Playwright 1.56 supports up to Ubuntu 24.04
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://nonjee888.github.io/bonggoon-quest/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: 새 버전이 실제로 올라올 때까지 잠깐 기다리기
+        run: |
+          for i in $(seq 1 30); do
+            curl -s "$BASE_URL?v=$RANDOM" | grep -q 'integrity="sha384-' && break
+            sleep 10
+          done
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: live-playwright-report
+          path: playwright-report/
+          retention-days: 7

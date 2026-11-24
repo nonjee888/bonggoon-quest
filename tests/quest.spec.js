@@ -134,7 +134,8 @@ test.describe("인스타 스토리에 올리기 (안드로이드 인스타그램
     const link = page.locator("#openExternal");
     await expect(link).toHaveText("크롬으로 열기");
     const href = await link.getAttribute("href");
-    expect(href).toMatch(/^intent:\/\/127\.0\.0\.1:4173\/\?result=n-100#Intent;scheme=https;package=com\.android\.chrome;end$/);
+    const host = new URL(page.url()).host + new URL(page.url()).pathname;
+    expect(href).toBe(`intent://${host}?result=n-100#Intent;scheme=https;package=com.android.chrome;end`);
   });
 });
 
@@ -156,15 +157,16 @@ test.describe("인스타 스토리에 올리기 (아이폰 인스타그램 앱 �
 // 카카오 SDK는 등록된 도메인에서만 작동해서, 테스트에서는 가짜 SDK로 바꿔 무엇을 보내는지 확인해요.
 test.describe("카카오톡으로 공유하기", () => {
   test.beforeEach(async ({ page }) => {
-    await page.route("**/kakao_js_sdk/**", (route) => route.fulfill({
-      contentType: "application/javascript",
-      body: `window.__kakao = { uploads: [], sent: [] };
-        window.Kakao = { _init:false, init(){ this._init=true; }, isInitialized(){ return this._init; },
-          Share: {
-            async uploadImage({ file }) { const f = file[0]; window.__kakao.uploads.push({ name:f.name, type:f.type, size:f.size });
-              return { infos: { original: { url: "https://k.kakaocdn.net/test/license.jpg", width: 800, height: 800 } } }; },
-            sendDefault(o) { window.__kakao.sent.push(o); } } };`,
-    }));
+    // 진짜 SDK는 무결성(SRI) 검사 때문에 바꿔치기할 수 없어서, 요청은 막고 가짜 Kakao를 미리 심어요
+    await page.route("**/kakao_js_sdk/**", (route) => route.abort());
+    await page.addInitScript(() => {
+      window.__kakao = { uploads: [], sent: [] };
+      window.Kakao = { _init:false, init(){ this._init=true; }, isInitialized(){ return this._init; },
+        Share: {
+          async uploadImage({ file }) { const f = file[0]; window.__kakao.uploads.push({ name:f.name, type:f.type, size:f.size });
+            return { infos: { original: { url: "https://k.kakaocdn.net/test/license.jpg", width: 800, height: 800 } } }; },
+          sendDefault(o) { window.__kakao.sent.push(o); } } };
+    });
   });
 
   test("내 결과 면허증 이미지가 카톡 카드 썸네일로 들어간다", async ({ page }) => {
@@ -182,7 +184,7 @@ test.describe("카카오톡으로 공유하기", () => {
     expect(c.imageUrl).toBe("https://k.kakaocdn.net/test/license.jpg");
     expect(c.description).toContain("든든한 보디가드형");
     expect(c.description).toContain("100%");
-    expect(c.link.mobileWebUrl).toMatch(/^http:\/\/127\.0\.0\.1:4173\/$/);
+    const pu = new URL(page.url()); expect(c.link.mobileWebUrl).toBe(pu.origin + pu.pathname);
   });
 });
 
