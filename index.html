@@ -483,9 +483,9 @@ document.getElementById("kakao").onclick = shareKakao;
     rabbit:[".W.W..",".W.W..",".WnW..","WWWWW.","WkWWW.","WWWWWW",".WWWWW",".W..W."],
   };
   const PLACE=[["rose",27,39],["rabbit",225,21],["barley",354,126],["sprout",129,144],["squirrel",45,240],["tulip",279,225],["skunk",156,339],["sprout",369,354],
-    ["bong",250,290,.45],["bong",300,36,.45,"pc"],["bong",360,212,.45,"pc"]];
+    ["bong",250,290,.45,"pc"],["bong",300,36,.45,"pc"],["bong",360,212,.45,"pc"]];
   // phone only: extra sprites in the gaps so the dense tile shows more
-  const MORE=[["bong",2,92,.45],["bong",2,280,.45],["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["tulip",60,345],["rabbit",290,370]];
+  const MORE=[["bong",2,92,.45],["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["tulip",60,345],["rabbit",290,370]];
   // ponytail: two sizes only — phone (f=0.8: small, dense tile) and monitor (f=2); positions are in f=1 units, tile = 30 checker cells so it repeats seamlessly
   const mq = matchMedia("(min-width: 700px)");
   function draw(){
@@ -493,7 +493,7 @@ document.getElementById("kakao").onclick = shareKakao;
     c.width=c.height=T*S; const x=c.getContext("2d");
     x.fillStyle="#62B43A"; x.fillRect(0,0,T*S,T*S); x.fillStyle="#58A833";
     for(let gy=0;gy<T;gy+=C) for(let gx=0;gx<T;gx+=C) if(((gx+gy)/C)%2) x.fillRect(gx*S,gy*S,C*S,C*S);
-    // "pc" sprites are desktop-only (phone shows 3 봉군이, desktop 3)
+    // "pc" sprites are desktop-only (phone shows 1 봉군이 per tile, desktop 3)
     for(const [name,px,py,sc] of (mq.matches ? PLACE : PLACE.filter(p=>p[4]!=="pc").concat(MORE))) { const u = Math.max(2, Math.round(U*(sc||1)));
       SP[name].forEach((row,ry)=>[...row].forEach((ch,rx)=>{
       if(ch===".") return; x.fillStyle=PAL[ch]; x.fillRect((Math.round(px*f)+rx*u)*S,(Math.round(py*f)+ry*u)*S,u*S,u*S);
