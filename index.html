@@ -368,7 +368,6 @@ function setMsg(t){ document.getElementById("loaderMsg").textContent = t; }
 function showImage(msg){
   const img = document.getElementById("readyImg");
   img.src = URL.createObjectURL(readyBlob); img.hidden = false;
-  document.getElementById("sq").hidden = true;
   document.getElementById("shareNow").hidden = true;
   setMsg(msg);
 }
@@ -382,7 +381,8 @@ function offerDownload(msg){
 }
 // Pick what this browser can really do, and name the button after it
 function loaderDone(){
-  LD.stop(); document.getElementById("acorns").textContent = "";
+  LD.quiet(); // 봉군이 산책은 [닫기]를 누를 때까지 계속돼요
+
   const btn = document.getElementById("shareNow");
   if (mode === "save") {
     if (IN_APP) {
@@ -451,7 +451,8 @@ const LD = (()=>{
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const DW=14*U, STOP=Math.round((W-DW)/2);
   let raf=0, sx=-DW, t=0, phase="walk", wait=0, poops=[];
-  const say = (m)=>{ document.getElementById("acorns").textContent = m; };
+  let mute = false;
+  const say = (m)=>{ if (!mute) document.getElementById("acorns").textContent = m; };
   function sprite(g, px, py){ g.forEach((row,ry)=>[...row].forEach((ch,rx)=>{ if(ch==="."||!PAL[ch]) return;
     x.fillStyle=PAL[ch]; x.fillRect(px+rx*U, py+ry*U, U, U); })); }
   function frame(){
@@ -472,7 +473,8 @@ const LD = (()=>{
     raf=requestAnimationFrame(frame);
   }
   return {
-    start(){ sx=-DW; t=0; phase="walk"; poops=[]; say(""); cancelAnimationFrame(raf); frame(); },
+    start(){ mute=false; sx=-DW; t=0; phase="walk"; poops=[]; say(""); cancelAnimationFrame(raf); frame(); },
+    quiet(){ document.getElementById("acorns").textContent = ""; mute=true; },
     stop(){ cancelAnimationFrame(raf); },
   };
 })();
@@ -520,7 +522,7 @@ async function shareKakao(){
     const o = res.infos.original;
     kakaoImg = { url:o.url, width:o.width, height:o.height }; kakaoFor = lastResult;
   }catch(e){ kakaoImg = null; } // upload failed: send with the default photo instead
-  LD.stop(); document.getElementById("acorns").textContent = "";
+  LD.quiet();
   setMsg("면허증이 완성됐어요!");
   const btn = document.getElementById("shareNow"); btn.textContent = "카카오톡으로 보내기"; btn.hidden = false;
 }

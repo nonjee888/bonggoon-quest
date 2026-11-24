@@ -292,3 +292,18 @@ test.describe("컴퓨터에서 인스타 스토리", () => {
     await expect(page.locator("#loaderMsg")).toContainText("휴대폰 카메라");
   });
 });
+
+test("면허증이 완성돼도 [닫기] 전까지 봉군이 산책 애니메이션이 계속 움직인다", async ({ page }) => {
+  await page.goto("./");
+  await playQuiz(page, 0);
+  await page.getByRole("button", { name: "면허증 이미지 저장하기" }).click();
+  await expect(page.locator("#openExternal")).toHaveText("사진 저장하기", { timeout: 15_000 });
+  const sq = page.locator("#sq");
+  await expect(sq).toBeVisible();
+  const a = await sq.evaluate((c) => c.toDataURL());
+  await page.waitForTimeout(400);
+  const b = await sq.evaluate((c) => c.toDataURL());
+  expect(a).not.toBe(b); // 그림이 바뀌고 있다 = 계속 재생 중
+  await page.getByRole("button", { name: "닫기" }).click();
+  await expect(page.locator("#loader")).toBeHidden();
+});
