@@ -267,7 +267,7 @@ test("면허증 바로 아래에 '만나 보고 싶다면 인스타 DM' 한 줄�
   expect(await line.getAttribute("href")).toBe(INSTA);
 });
 
-test("저장 이미지 위에는 '너도 해 봐' 안내판, 아래에는 스티커 붙일 빈 공간이 있다", async ({ page }) => {
+test("저장 이미지 위에는 제목 안내판, 아래에는 스티커 붙일 빈 공간이 있다", async ({ page }) => {
   await page.goto("./");
   await play(page, [0, 0, 0, 0, 0, 0]);
   await page.getByRole("button", { name: "면허증 이미지 저장하기" }).click();
@@ -279,7 +279,7 @@ test("저장 이미지 위에는 '너도 해 봐' 안내판, 아래에는 스티
     const i = new Image(); i.src = "data:image/jpeg;base64," + b64; await i.decode();
     const c = document.createElement("canvas"); c.width = i.width; c.height = i.height; const x = c.getContext("2d"); x.drawImage(i, 0, 0);
     const at = (X, Y) => Array.from(x.getImageData(X, Y, 1, 1).data.slice(0, 3));
-    return { top: at(980, 120), bottom: at(540, 1850) };
+    return { top: at(990, 70), bottom: at(540, 1880) };
   }, b64);
   expect(px.top[0]).toBeGreaterThan(230);            // 밝은 안내판 (#FFF4D2)
   expect(px.bottom[1]).toBeGreaterThan(px.bottom[0]); // 아래는 풀밭(초록) 빈 공간
