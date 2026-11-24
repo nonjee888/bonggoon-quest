@@ -263,6 +263,7 @@ p{margin:0}
       <canvas id="sq" width="640" height="200" aria-hidden="true"></canvas>
       <p id="loaderMsg" style="font-family:var(--display);font-size:22px">면허증을 만드는 중이에요...</p>
       <p id="acorns" class="small" aria-live="polite"></p>
+      <div id="qrBox" hidden style="background:#fff;padding:12px;border:3px solid var(--ink);align-self:center"></div>
       <img id="readyImg" hidden alt="완성된 봉군이 산책 면허증" style="width:100%;max-height:60vh;object-fit:contain;background:var(--ink);border:3px solid var(--ink);-webkit-touch-callout:default">
       <a class="btn alt" id="openExternal" hidden>다른 브라우저로 열기</a>
       <button class="btn" id="shareNow" type="button" hidden></button>
@@ -272,6 +273,7 @@ p{margin:0}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
 <script>
 // ▼ 카카오 개발자 사이트(developers.kakao.com) > 내 애플리케이션 > 앱 키 > "JavaScript 키"를 따옴표 안에 넣어 주세요.
@@ -384,7 +386,18 @@ async function shareFile(){
   }
 }
 document.getElementById("saveImg").onclick = ()=>startLicense("save");
-document.getElementById("storyBtn").onclick = ()=>startLicense("story");
+// 컴퓨터에서는 인스타 스토리를 올릴 수 없어요 → 같은 결과를 휴대폰에서 여는 QR 코드를 보여줘요
+function showQR(){
+  const url = PAGE_URL + "?result=" + lastResult.replace("#result-", "");
+  loaderOpen(); LD.stop();
+  document.getElementById("sq").hidden = true; document.getElementById("acorns").textContent = "";
+  const box = document.getElementById("qrBox"); box.innerHTML = ""; box.dataset.url = url; box.hidden = false;
+  if (window.QRCode) new QRCode(box, { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+  else box.textContent = url;
+  setMsg("휴대폰 카메라로 찍으면 내 면허증이 그대로 열려요. 거기서 [인스타 스토리에 올리기]를 눌러 주세요.");
+}
+if (!IS_MOBILE) document.getElementById("storyBtn").textContent = "휴대폰으로 이어서 하기 (인스타 스토리)";
+document.getElementById("storyBtn").onclick = ()=> IS_MOBILE ? startLicense("story") : showQR();
 document.getElementById("shareNow").onclick = ()=> mode === "kakao" ? sendKakao() : shareFile();
 document.getElementById("loaderClose").onclick = loaderClose;
 
@@ -421,7 +434,7 @@ function loaderOpen(){
   document.getElementById("loaderMsg").textContent = "면허증을 만드는 중이에요...";
   document.getElementById("shareNow").hidden = true;
   document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true; document.getElementById("openExternal").className = "btn alt";
-  document.getElementById("sq").hidden = false;
+  document.getElementById("sq").hidden = false; document.getElementById("qrBox").hidden = true;
   document.getElementById("loader").hidden = false; LD.start();
 }
 function loaderClose(){ LD.stop(); document.getElementById("loader").hidden = true; }

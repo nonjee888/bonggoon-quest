@@ -46,7 +46,7 @@ test("결과가 나오면 프로필 버튼은 숨고 결과 화면에 입양·�
   await expect(result.getByRole("link", { name: "입양 신청서" })).toBeVisible();
   await expect(result.getByRole("link", { name: "봉군이 인스타 @im.bonggoon" })).toBeVisible();
   await expect(result.getByRole("button", { name: "면허증 이미지 저장하기" })).toBeVisible();
-  await expect(result.getByRole("button", { name: "인스타 스토리에 올리기" })).toBeVisible();
+  await expect(result.getByRole("button", { name: /인스타 스토리/ })).toBeVisible();
   await expect(result.getByRole("button", { name: "카카오톡으로 공유하기" })).toBeVisible();
 
   await page.getByRole("button", { name: "↺ 테스트 다시 하기" }).click();
@@ -99,6 +99,7 @@ test.describe("카카오톡 앱 안에서 열었을 때", () => {
 // ── 인스타그램 연결 ─────────────────────────────────────────────
 // 실제 인스타 앱은 테스트할 수 없어서, 휴대폰 공유 창(navigator.share)을 가짜로 바꿔 무엇이 넘어가는지 확인해요.
 test.describe("인스타 스토리에 올리기 (휴대폰 브라우저)", () => {
+  test.use({ userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36" });
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       window.__shared = [];
@@ -273,4 +274,19 @@ test("면허증 유형 옆에 픽셀 봉군이 도장이 찍혀 있다", async (
   await expect(seal).toBeVisible();
   await expect(seal.locator("img")).toHaveJSProperty("complete", true);
   expect(await seal.locator("img").evaluate((i) => i.naturalWidth)).toBeGreaterThan(0);
+});
+
+test.describe("컴퓨터에서 인스타 스토리", () => {
+  test.use({ userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" });
+
+  test("[휴대폰으로 이어서 하기]를 누르면 같은 결과로 가는 QR 코드가 나온다", async ({ page }) => {
+    await page.goto("./");
+    await playQuiz(page, 2);
+    await page.getByRole("button", { name: /휴대폰으로 이어서 하기/ }).click();
+    const box = page.locator("#qrBox");
+    await expect(box).toBeVisible();
+    await expect(box.locator("canvas, img").first()).toBeAttached();
+    expect(await box.getAttribute("data-url")).toMatch(/\?result=s-100$/);
+    await expect(page.locator("#loaderMsg")).toContainText("휴대폰 카메라");
+  });
 });
