@@ -254,3 +254,14 @@ test("캐러셀은 가만히 두면 3초 뒤 다음 사진으로 넘어간다", 
   await expect(count).toHaveText(/^1 \//);
   await expect(count).toHaveText(/^2 \//, { timeout: 5_000 });
 });
+
+test("홈 화면 바로가기 아이콘: manifest에 192·512 봉군이 아이콘이 있고 열린다", async ({ page }) => {
+  await page.goto("./");
+  const href = await page.locator('link[rel="manifest"]').getAttribute("href");
+  const res = await page.request.get(href);
+  expect(res.status()).toBe(200);
+  const m = await res.json();
+  const sizes = m.icons.map((i) => i.sizes);
+  expect(sizes).toEqual(expect.arrayContaining(["192x192", "512x512"]));
+  for (const i of m.icons) expect((await page.request.get(i.src)).status(), i.src).toBe(200);
+});
