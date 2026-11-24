@@ -81,8 +81,9 @@ p{margin:0}
 .license .top span:last-child{font-family:var(--pixel);font-size:9px}
 .license .body{padding:14px;display:grid;grid-template-columns:1fr;gap:12px}
 .license .photo{position:relative;width:100%;aspect-ratio:1/1;background-size:cover;background-repeat:no-repeat;border:4px solid var(--ink);box-sizing:border-box}
-/* 픽셀 도장: 사진 오른쪽 아래에 살짝 기울여 찍어요 */
-.seal{position:absolute;right:8px;bottom:8px;width:84px;height:84px;border-radius:50%;border:3px dashed #D7263D;background:rgba(255,244,210,.88);
+/* 픽셀 도장: 유형 이름 오른쪽 빈 공간에 살짝 기울여 찍어요 */
+.license .info{position:relative;padding-right:100px}
+.seal{position:absolute;right:4px;top:50%;margin-top:-42px;width:84px;height:84px;border-radius:50%;border:3px dashed #D7263D;background:rgba(255,244,210,.88);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transform:rotate(-10deg);box-shadow:0 0 0 3px rgba(255,244,210,.88)}
 .seal img{width:40px;height:40px;image-rendering:pixelated;display:block}
 .seal span{font-family:var(--display);font-size:11px;line-height:1.05;color:#D7263D;text-align:center}
@@ -164,12 +165,12 @@ p{margin:0}
     <div class="license">
       <div class="top"><span>봉군이 산책 면허증</span><span id="rNo"></span></div>
       <div class="body">
-        <div class="photo" id="rImg" role="img"><div class="seal" aria-label="봉군이 공식 인증 도장"><img src="img/stamp.png" alt=""><span>봉군이<br>인증</span></div></div>
+        <div class="photo" id="rImg" role="img"></div>
         <div>
-          <div class="lbl">나와 봉군이는</div>
+          <div class="info"><div class="seal" aria-label="봉군이 공식 인증 도장"><img src="img/stamp.png" alt=""><span>봉군이<br>인증</span></div><div class="lbl">나와 봉군이는</div>
           <h2 class="type" id="rType"></h2>
           <div class="lbl">궁합 지수</div>
-          <div class="pct" id="rPct"></div>
+          <div class="pct" id="rPct"></div></div>
         </div>
       </div>
       <p class="desc" id="rDesc"></p>
@@ -569,8 +570,8 @@ function preview(){
   $("preview").innerHTML = '<span class="tag">LICENSE PREVIEW · 4</span>' + KEYS.map(k=>{
     const t = TYPES[k];
     return `<div class="license"><div class="top"><span>봉군이 산책 면허증</span><span>NO.0000</span></div>
-      <div class="body"><div class="photo" role="img" aria-label="${t.alt}" style="background-image:url(${t.img});background-position:${t.pos}"><div class="seal" aria-label="봉군이 공식 인증 도장"><img src="img/stamp.png" alt=""><span>봉군이<br>인증</span></div></div><div>
-      <div class="lbl">나와 봉군이는</div><h2 class="type">${t.name}</h2><div class="lbl">궁합 지수</div><div class="pct">100%</div></div></div>
+      <div class="body"><div class="photo" role="img" aria-label="${t.alt}" style="background-image:url(${t.img});background-position:${t.pos}"></div><div>
+      <div class="info"><div class="seal" aria-label="봉군이 공식 인증 도장"><img src="img/stamp.png" alt=""><span>봉군이<br>인증</span></div><div class="lbl">나와 봉군이는</div><h2 class="type">${t.name}</h2><div class="lbl">궁합 지수</div><div class="pct">100%</div></div></div></div>
       <p class="desc">${t.desc}</p><div class="stamp"><span>봉군이 TMI · ${t.fact}</span></div></div>`;
   }).join("");
   $("preview").scrollIntoView({block:"start"});

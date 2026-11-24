@@ -266,10 +266,10 @@ test("홈 화면 바로가기 아이콘: manifest에 192·512 봉군이 아이�
   for (const i of m.icons) expect((await page.request.get(i.src)).status(), i.src).toBe(200);
 });
 
-test("면허증 사진에 픽셀 봉군이 도장이 찍혀 있다", async ({ page }) => {
+test("면허증 유형 옆에 픽셀 봉군이 도장이 찍혀 있다", async ({ page }) => {
   await page.goto("./");
   await playQuiz(page, 0);
-  const seal = page.locator("#rImg .seal");
+  const seal = page.locator("#result .info .seal");
   await expect(seal).toBeVisible();
   await expect(seal.locator("img")).toHaveJSProperty("complete", true);
   expect(await seal.locator("img").evaluate((i) => i.naturalWidth)).toBeGreaterThan(0);
