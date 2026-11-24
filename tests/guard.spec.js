@@ -210,7 +210,7 @@ test("링크 미리보기 이미지는 1200×630, 메타 태그가 맞다", asyn
 });
 
 // ── 방문 통계 ────────────────────────────────────────
-test("통계 코드가 비어 있으면 통계 서버에 아무것도 보내지 않는다", async ({ page }) => {
+test("자동 테스트 브라우저에서는 통계 서버에 아무것도 보내지 않는다 (테스트가 통계를 오염시키지 않게)", async ({ page }) => {
   const hits = [];
   page.on("request", (r) => { if (/goatcounter|gc\.zgo\.at/.test(r.url())) hits.push(r.url()); });
   await page.goto("./");
@@ -222,7 +222,7 @@ test("통계를 켜면 시작·결과·공유·신청서 클릭이 이벤트로 
   // 사이트 코드를 넣은 상태를 흉내 내고, 실제 통계 서버 대신 가짜로 받아요
   await page.route(/\/(index\.html)?(\?.*)?$/, async (route) => {
     const res = await route.fetch(); let body = await res.text();
-    body = body.replace('const GC_CODE = "";', 'const GC_CODE = "test";');
+    body = body.replace(/const GC_CODE = "[a-z0-9-]*";/, 'const GC_CODE = "test";');
     await route.fulfill({ response: res, body });
   });
   await page.route("**/gc.zgo.at/**", (r) => r.abort());
