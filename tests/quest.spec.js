@@ -220,3 +220,27 @@ test("사진에 촬영 위치(GPS)·기기 정보가 없다", async () => {
     expect(bytes.toLowerCase(), `${f}에 기기 정보가 있어요`).not.toMatch(/samsung|galaxy|iphone/);
   }
 });
+
+test("프로필 사진 캐러셀: [▶]로 넘기고 [◀]로 돌아온다", async ({ page }) => {
+  await page.goto("./");
+  const count = page.locator("#gCount");
+  await expect(count).toHaveText(/^1 \/ \d+$/);
+  const total = Number((await count.textContent()).split("/")[1]);
+  expect(total).toBeGreaterThanOrEqual(10);
+  await expect(page.locator("#gPrev")).toBeDisabled();
+  await page.locator("#gNext").click();
+  await expect(count).toHaveText(`2 / ${total}`);
+  await page.locator("#gNext").click();
+  await expect(count).toHaveText(`3 / ${total}`);
+  await page.locator("#gPrev").click();
+  await expect(count).toHaveText(`2 / ${total}`);
+  // 모든 사진이 실제로 열리는지
+  for (const src of await page.locator("#track img").evaluateAll((els) => els.map((e) => e.getAttribute("src")))) {
+    expect((await page.request.get(src)).status(), src).toBe(200);
+  }
+});
+
+test("시작 버튼 아래에 구분선이 있다", async ({ page }) => {
+  await page.goto("./");
+  await expect(page.locator("#start .divider")).toBeVisible();
+});

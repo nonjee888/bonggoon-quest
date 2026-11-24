@@ -66,7 +66,7 @@ p{margin:0}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{appearance:none;font:inherit;font-weight:700;color:var(--ink);text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center;
   padding:12px;background:var(--sign-hi);border:3px solid var(--ink);box-shadow:inset -4px -4px 0 var(--sign-lo)}
-.opt:hover{background:#FFFBEA}
+@media (hover:hover){.opt:hover{background:#FFFBEA}}
 .opt b{flex:none;font-family:var(--pixel);font-size:12px;width:30px;height:30px;display:grid;place-items:center;background:var(--grass);color:#fff;border:3px solid var(--ink)}
 
 /* license */
@@ -94,8 +94,17 @@ p{margin:0}
 .traits li{display:flex;gap:10px;align-items:baseline}
 .traits li::before{content:"";flex:none;width:10px;height:10px;background:var(--grass);border:2px solid var(--ink);transform:translateY(-1px)}
 .traits li.warn::before{background:var(--gold)}
-.pics{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.pics img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border:4px solid var(--ink)}
+.gallery{position:relative}
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;border:4px solid var(--ink);background:var(--ink);scrollbar-width:none}
+.track::-webkit-scrollbar{display:none}
+.track img{flex:0 0 100%;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 35%;scroll-snap-align:start;display:block}
+.gnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
+.gbtn{appearance:none;cursor:pointer;font-family:var(--display);font-size:20px;color:var(--ink);background:var(--sign-hi);border:3px solid var(--ink);
+  box-shadow:inset -4px -4px 0 var(--sign-lo);width:52px;height:44px}
+.gbtn:disabled{opacity:.35;cursor:default}
+.gbtn:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
+.gcount{font-family:var(--pixel);font-size:12px}
+.divider{height:12px;margin-top:22px;background:repeating-linear-gradient(90deg,var(--grass-dark) 0 14px,transparent 14px 22px)}
 .vax{background:var(--sign-hi);border:3px solid var(--ink);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0;font-variant-numeric:tabular-nums}
 .vax h3{grid-column:1/-1;font-size:20px}
 .vax dt{font-weight:700;color:var(--grass-dark)}
@@ -132,7 +141,9 @@ p{margin:0}
   </section>
 
   <section id="start" class="cta">
-    <button class="btn" id="go" type="button">▶ 산책 궁합 알아보기</button>  </section>
+    <button class="btn" id="go" type="button">▶ 산책 궁합 알아보기</button>
+    <div class="divider" aria-hidden="true"></div>
+  </section>
 
   <section class="sign" id="quiz" hidden>
     <div class="prog"><span class="lv" id="count"></span><div class="blocks" id="blocks"></div></div>
@@ -191,9 +202,28 @@ p{margin:0}
       <li>산책을 아주 좋아해요.</li>
       <li class="warn">다른 강아지를 무서워하지만 적응하면 괜찮아요.</li>
     </ul>
-    <div class="pics">
-      <img src="img/pro-wall.jpg" style="object-position:center 45%" alt="벽 옆에서 옆모습을 보이는 봉군이">
-      <img src="img/pro-doze.jpg" style="object-position:center 45%" alt="방석 위에 앉아 꾸벅꾸벅 조는 봉군이">
+    <div class="gallery" role="region" aria-roledescription="사진 넘기기" aria-label="봉군이 사진">
+      <div class="track" id="track" tabindex="0">
+        <img src="img/gal-01.jpg" alt="벽에 기대 옆을 보는 봉군이" loading="eager">
+        <img src="img/gal-02.jpg" alt="방석 위에서 꾸벅꾸벅 조는 봉군이" loading="eager">
+        <img src="img/gal-03.jpg" alt="입을 벌리고 웃는 봉군이 얼굴" loading="lazy">
+        <img src="img/gal-04.jpg" alt="방석에 얌전히 앉은 봉군이" loading="lazy">
+        <img src="img/gal-05.jpg" alt="차 안에서 하네스를 하고 창밖을 보는 봉군이" loading="lazy">
+        <img src="img/gal-06.jpg" alt="계단에서 정면을 보는 봉군이" loading="lazy">
+        <img src="img/gal-07.jpg" alt="벽에 기대 카메라를 보는 봉군이" loading="lazy">
+        <img src="img/gal-08.jpg" alt="차 안에서 얼굴을 기댄 봉군이" loading="lazy">
+        <img src="img/gal-09.jpg" alt="베개에 얼굴을 묻은 봉군이" loading="lazy">
+        <img src="img/gal-10.jpg" alt="방석에 엎드려 옆을 보는 봉군이" loading="lazy">
+        <img src="img/gal-11.jpg" alt="방석에 기대 잠든 봉군이" loading="lazy">
+        <img src="img/gal-12.jpg" alt="침대에서 잠든 봉군이" loading="lazy">
+        <img src="img/gal-13.jpg" alt="산책길 점자블록 위의 봉군이" loading="lazy">
+        <img src="img/gal-14.jpg" alt="크리스마스트리 옆에서 얼굴을 감싸인 봉군이" loading="lazy">
+      </div>
+      <div class="gnav">
+        <button class="gbtn" id="gPrev" type="button" aria-label="이전 사진">◀</button>
+        <span class="gcount" id="gCount" aria-live="polite">1 / 14</span>
+        <button class="gbtn" id="gNext" type="button" aria-label="다음 사진">▶</button>
+      </div>
     </div>
     <dl class="vax">
       <h3>예방접종 이력</h3>
@@ -529,6 +559,21 @@ addEventListener("hashchange", preview); preview();
 if (IN_KAKAO) { try{ if (!sessionStorage.getItem("ext")) { sessionStorage.setItem("ext","1"); location.href = externalUrl(); } }catch(e){} }
 $("go").onclick = ()=>{ $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 $("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
+
+// 봉군이 사진 넘기기: swipe works natively (scroll-snap); buttons and counter follow the scroll position
+(function gallery(){
+  const tr = document.getElementById("track"), n = tr.children.length;
+  const idx = () => Math.round(tr.scrollLeft / tr.clientWidth);
+  const go = (k) => tr.scrollTo({ left: Math.max(0, Math.min(n-1, k)) * tr.clientWidth });
+  function sync(){ const i = idx();
+    document.getElementById("gCount").textContent = `${i+1} / ${n}`;
+    document.getElementById("gPrev").disabled = i === 0; document.getElementById("gNext").disabled = i === n-1; }
+  document.getElementById("gPrev").onclick = () => go(idx()-1);
+  document.getElementById("gNext").onclick = () => go(idx()+1);
+  tr.addEventListener("keydown", (e) => { if (e.key==="ArrowRight") go(idx()+1); if (e.key==="ArrowLeft") go(idx()-1); });
+  tr.addEventListener("scroll", () => requestAnimationFrame(sync), {passive:true});
+  sync();
+})();
 </script>
 </body>
 </html>
