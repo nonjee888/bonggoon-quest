@@ -307,3 +307,16 @@ test("면허증이 완성돼도 [닫기] 전까지 봉군이 산책 애니메이
   await page.getByRole("button", { name: "닫기" }).click();
   await expect(page.locator("#loader")).toBeHidden();
 });
+
+test("면허증을 저장하면 스토리 링크 스티커용 테스트 링크가 자동 복사된다", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("./");
+  await playQuiz(page, 1);
+  await page.getByRole("button", { name: "면허증 이미지 저장하기" }).click();
+  await expect(page.locator("#openExternal")).toHaveText("사진 저장하기", { timeout: 15_000 });
+  await expect(page.locator("#copyNote")).toBeVisible();
+  await expect(page.locator("#copyNote")).toContainText("링크 스티커");
+  const clip = await page.evaluate(() => navigator.clipboard.readText());
+  const pu = new URL(page.url());
+  expect(clip).toBe(pu.origin + pu.pathname + "?ref=story");
+});

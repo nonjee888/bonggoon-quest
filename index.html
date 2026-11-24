@@ -278,6 +278,7 @@ p{margin:0}
       <canvas id="sq" width="640" height="200" aria-hidden="true"></canvas>
       <p id="loaderMsg" style="font-family:var(--display);font-size:22px">면허증을 만드는 중이에요...</p>
       <p id="acorns" class="small" aria-live="polite"></p>
+      <p id="copyNote" class="small" role="status" hidden style="color:var(--grass-dark);font-weight:700"></p>
       <div id="qrBox" hidden style="background:#fff;padding:12px;border:3px solid var(--ink);align-self:center"></div>
       <img id="readyImg" hidden alt="완성된 봉군이 산책 면허증" style="width:100%;max-height:60vh;object-fit:contain;background:var(--ink);border:3px solid var(--ink);-webkit-touch-callout:default">
       <a class="btn alt" id="openExternal" hidden>다른 브라우저로 열기</a>
@@ -335,7 +336,12 @@ const EXT_LABEL = IN_KAKAO ? "다른 브라우저로 열기" : "크롬으로 열
 const licFile = () => new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
 const canShareFile = () => !IN_APP && !!navigator.canShare?.({files:[licFile()]});
 
+// 이미지엔 링크를 넣을 수 없어서, 저장 버튼을 누르는 순간 테스트 링크를 복사해 둬요 (스토리 링크 스티커에 붙여넣기용)
+const STORY_LINK = PAGE_URL + "?ref=story";
+let copied = false;
 async function startLicense(m){
+  copied = false;
+  try { navigator.clipboard?.writeText(STORY_LINK).then(()=>{ copied = true; }, ()=>{}); } catch(e) {}
   mode = m; track(m === "save" ? "3-공유-이미지저장버튼" : "3-공유-인스타스토리버튼");
   const toast = document.getElementById("saveToast"); toast.textContent = "";
   if(!window.html2canvas){ toast.textContent = "지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요."; return; }
@@ -397,7 +403,12 @@ function offerDownload(msg){
   r.readAsDataURL(readyBlob);
 }
 // Pick what this browser can really do, and name the button after it
+function showCopyNote(){
+  const n = document.getElementById("copyNote");
+  if (copied) { n.textContent = "🔗 테스트 링크가 복사됐어요! 스토리에서 링크 스티커를 누르고 붙여넣어 주세요."; n.hidden = false; }
+}
 function loaderDone(){
+  setTimeout(showCopyNote, 0);
   LD.quiet(); // 봉군이 산책은 [닫기]를 누를 때까지 계속돼요
 
   const btn = document.getElementById("shareNow");
@@ -499,7 +510,7 @@ function loaderOpen(){
   document.getElementById("loaderMsg").textContent = "면허증을 만드는 중이에요...";
   document.getElementById("shareNow").hidden = true;
   document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true; document.getElementById("openExternal").className = "btn alt";
-  document.getElementById("sq").hidden = false; document.getElementById("qrBox").hidden = true;
+  document.getElementById("sq").hidden = false; document.getElementById("qrBox").hidden = true; document.getElementById("copyNote").hidden = true;
   document.getElementById("loader").hidden = false; LD.start();
 }
 function loaderClose(){ LD.stop(); document.getElementById("loader").hidden = true; }
