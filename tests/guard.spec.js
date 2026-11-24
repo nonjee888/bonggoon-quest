@@ -259,10 +259,10 @@ test("휴대폰 첫 화면에서 시작 버튼이 스크롤 없이 보인다", a
   expect(box.y + box.height).toBeLessThanOrEqual(vh);
 });
 
-test("면허증 바로 아래에 입양 신청서 한 줄이 있다", async ({ page }) => {
+test("면허증 바로 아래에 '만나 보고 싶다면 인스타 DM' 한 줄이 있다", async ({ page }) => {
   await page.goto("./");
   await play(page, [0, 0, 0, 0, 0, 0]);
   const line = page.locator("#result .meetline");
   await expect(line).toBeVisible();
-  expect(await line.getAttribute("href")).toBe(ADOPT);
+  expect(await line.getAttribute("href")).toBe(INSTA);
 });
