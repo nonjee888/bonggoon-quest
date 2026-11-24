@@ -301,14 +301,14 @@ if (TRACK_ON && !window.goatcounter?.count) {
   sc.dataset.goatcounter = `https://${GC_CODE}.goatcounter.com/count`;
   document.head.appendChild(sc);
 }
-// 이벤트 이름: 테스트시작, 결과-산책메이트형 등, 이미지저장, 인스타스토리, 휴대폰QR, 카톡공유, 입양신청서, 인스타계정
+// 이벤트 이름은 단계 번호를 붙여 퍼널처럼 정렬돼요: 1-테스트시작 → 2-결과-○○형 → 3-공유-… → 4-입양신청서클릭 / 4-봉군이인스타방문
 function track(name){
   try { if (TRACK_ON && window.goatcounter?.count) window.goatcounter.count({ path: "event/" + name, title: name, event: true }); } catch(e) {}
 }
 document.addEventListener("click", (e) => {
   const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
-  if (a.href.includes("docs.google.com/forms")) track("입양신청서");
-  else if (a.href.includes("instagram.com/im.bonggoon")) track("인스타계정");
+  if (a.href.includes("docs.google.com/forms")) track("4-입양신청서클릭");
+  else if (a.href.includes("instagram.com/im.bonggoon")) track("4-봉군이인스타방문");
 });
 let shareMsg = "";
 // 면허증 이미지: render the license onto a 1080x1920 story canvas, cached per result.
@@ -330,7 +330,7 @@ const licFile = () => new File([readyBlob], "bonggoon-license.jpg", {type:"image
 const canShareFile = () => !IN_APP && !!navigator.canShare?.({files:[licFile()]});
 
 async function startLicense(m){
-  mode = m; track(m === "save" ? "이미지저장" : "인스타스토리");
+  mode = m; track(m === "save" ? "3-공유-이미지저장버튼" : "3-공유-인스타스토리버튼");
   const toast = document.getElementById("saveToast"); toast.textContent = "";
   if(!window.html2canvas){ toast.textContent = "지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요."; return; }
   loaderOpen();
@@ -418,8 +418,8 @@ async function shareFile(){
 document.getElementById("saveImg").onclick = ()=>startLicense("save");
 // 컴퓨터에서는 인스타 스토리를 올릴 수 없어요 → 같은 결과를 휴대폰에서 여는 QR 코드를 보여줘요
 function showQR(){
-  track("휴대폰QR");
-  const url = PAGE_URL + "?result=" + lastResult.replace("#result-", "");
+  track("3-공유-휴대폰QR");
+  const url = PAGE_URL + "?result=" + lastResult.replace("#result-", "") + "&ref=qr";
   loaderOpen(); LD.stop();
   document.getElementById("sq").hidden = true; document.getElementById("acorns").textContent = "";
   const box = document.getElementById("qrBox"); box.innerHTML = ""; box.dataset.url = url; box.hidden = false;
@@ -481,7 +481,7 @@ function copyFallback(){
 }
 function sendKakao(){
   const img = kakaoImg || { url: new URL("img/og.jpg", PAGE_URL).href, width: 1200, height: 630 };
-  const link = PAGE_URL;
+  const link = PAGE_URL + "?ref=kakao"; // 통계에서 카톡으로 들어온 방문을 구분해요
   try{
     Kakao.Share.sendDefault({
       objectType:"feed",
@@ -493,7 +493,7 @@ function sendKakao(){
   loaderClose();
 }
 async function shareKakao(){
-  track("카톡공유");
+  track("3-공유-카톡");
   if (!KAKAO_JS_KEY || !window.Kakao) return copyFallback();
   try{ if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY); }catch(e){ return copyFallback(); }
   if (kakaoImg && kakaoFor === lastResult) return sendKakao();
@@ -558,7 +558,7 @@ document.getElementById("kakao").onclick = shareKakao;
 })();
 
 // ponytail: answers map to 4 types (w/n/s/g); ties go to the earlier type in KEYS order
-const SHARE_URL = PAGE_URL;
+const SHARE_URL = PAGE_URL + "?ref=kakao";
 const QS = [
   ["주말 아침, 눈 뜨자마자 하고 싶은 건?", ["운동화 신고 동네 한 바퀴","차 타고 근교로 드라이브","이불 속에서 조금 더 자기","집 정리하고 문단속 확인"]],
   ["모임에서 나는?", ["늘 먼저 \"나가자\" 하는 사람","처음 보는 사람과도 인사 잘하는 사람","같이 있으면 편한 사람","낯선 자리에서 친구 챙기는 사람"]],
@@ -600,7 +600,7 @@ function show(){
 }
 let lastResult = "";
 function finish(){
-  setTimeout(() => track("결과-" + $("rType").textContent.replace(/\s/g, "")), 0);
+  setTimeout(() => track("2-결과-" + $("rType").textContent.replace(/\s/g, "")), 0);
   const top = KEYS.reduce((a,b)=> score[b]>score[a]?b:a, "w");
   showResult(top, 82 + score[top]*3); // 85~100
 }
@@ -637,7 +637,7 @@ addEventListener("hashchange", preview); preview();
   if (m) showResult(m[1], Math.min(100, +m[2])); }
 // 카톡 안에서 열리면 처음부터 진짜 브라우저로 넘겨요 (한 번만)
 if (IN_KAKAO) { try{ if (!sessionStorage.getItem("ext")) { sessionStorage.setItem("ext","1"); location.href = externalUrl(); } }catch(e){} }
-$("go").onclick = ()=>{ track("테스트시작"); $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
+$("go").onclick = ()=>{ track("1-테스트시작"); $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 $("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 
 // 봉군이 사진 넘기기: swipe works natively (scroll-snap); buttons and counter follow the scroll position

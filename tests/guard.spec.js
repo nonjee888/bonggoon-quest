@@ -247,6 +247,6 @@ test("통계를 켜면 시작·결과·공유·신청서 클릭이 이벤트로 
   await page.locator('#result a[href*="docs.google.com/forms"]').evaluate((a) => { a.addEventListener("click", (e) => e.preventDefault()); a.click(); });
   const ev = await page.evaluate(() => window.__events);
   const paths = ev.map((e) => e.path);
-  expect(paths).toEqual(expect.arrayContaining(["event/테스트시작", "event/결과-동네마실단짝형", "event/카톡공유", "event/입양신청서"]));
+  expect(paths).toEqual(expect.arrayContaining(["event/1-테스트시작", "event/2-결과-동네마실단짝형", "event/3-공유-카톡", "event/4-입양신청서클릭"]));
   for (const e of ev) expect(Object.keys(e).sort()).toEqual(["event", "path", "title"]);
 });

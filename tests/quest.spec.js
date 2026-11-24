@@ -184,7 +184,7 @@ test.describe("카카오톡으로 공유하기", () => {
     expect(c.imageUrl).toBe("https://k.kakaocdn.net/test/license.jpg");
     expect(c.description).toContain("든든한 보디가드형");
     expect(c.description).toContain("100%");
-    const pu = new URL(page.url()); expect(c.link.mobileWebUrl).toBe(pu.origin + pu.pathname);
+    const pu = new URL(page.url()); expect(c.link.mobileWebUrl).toBe(pu.origin + pu.pathname + "?ref=kakao"); // 출처 꼬리표
   });
 });
 
@@ -288,7 +288,7 @@ test.describe("컴퓨터에서 인스타 스토리", () => {
     const box = page.locator("#qrBox");
     await expect(box).toBeVisible();
     await expect(box.locator("canvas, img").first()).toBeAttached();
-    expect(await box.getAttribute("data-url")).toMatch(/\?result=s-100$/);
+    expect(await box.getAttribute("data-url")).toMatch(/\?result=s-100&ref=qr$/);
     await expect(page.locator("#loaderMsg")).toContainText("휴대폰 카메라");
   });
 });
