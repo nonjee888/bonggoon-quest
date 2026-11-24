@@ -67,6 +67,7 @@ p{margin:0}
 /* hero */
 .frame{border:4px solid var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.28);background:var(--sky);line-height:0}
 .frame img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center top;border:5px solid var(--sign)}
+@media (max-width:699px){.frame img{aspect-ratio:4/3;object-position:center 15%}}
 .hero h1{font-size:clamp(38px,11vw,52px)}
 .hero h1 em{font-style:normal;color:var(--accent);text-shadow:3px 3px 0 var(--ink)}
 
@@ -130,6 +131,10 @@ p{margin:0}
 .vax dd{margin:0}
 .cta{display:flex;flex-direction:column;gap:12px}
 .panel-h{font-size:26px}
+.meetline{display:block;background:var(--sign-hi);border:4px solid var(--ink);box-shadow:inset -4px -4px 0 var(--sign-lo);padding:14px 16px;
+  color:var(--ink);text-decoration:none;font-weight:700;font-size:16px;text-align:center}
+.meetline b{color:var(--accent);font-family:var(--display);font-weight:400;font-size:19px}
+.meetline:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
 .sign .toast{color:var(--grass-dark);min-height:0}
 .sign .toast:empty{display:none}
 .btn.kakao{background:#FEE500;box-shadow:inset -5px -5px 0 #C9B400,inset 5px 5px 0 #FFF27A,4px 4px 0 rgba(0,0,0,.3)}
@@ -185,6 +190,7 @@ p{margin:0}
       <p class="desc" id="rDesc"></p>
       <div class="stamp"><span id="rFact"></span></div>
     </div>
+    <a class="meetline" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener">🐶 봉군이를 실제로 만나 보고 싶다면 <b>입양 신청서 →</b></a>
     <div class="sign">
       <span class="tag">SHARE</span>
       <h2 class="panel-h">봉군이 소식을 퍼뜨려 주세요</h2>
@@ -432,32 +438,41 @@ document.getElementById("storyBtn").onclick = ()=> IS_MOBILE ? startLicense("sto
 document.getElementById("shareNow").onclick = ()=> mode === "kakao" ? sendKakao() : shareFile();
 document.getElementById("loaderClose").onclick = loaderClose;
 
-// 로딩: 픽셀 다람쥐가 좌우로 뛰어다니며 도토리를 주워요
+// 로딩: 산책하던 봉군이가 멈춰 서서 볼일을 보고 다시 걸어가요
 const LD = (()=>{
-  const PAL={b:"#B06A2E",B:"#7A4418",k:"#2B1D10",w:"#F4E3B5",n:"#C98A4B",g:"#3E8E2A"};
-  const SQ=[".BB.......","BbbB..bb..","BbbB.bbbb.",".BbbBbkbb.","..BbbbbbB.","...bbbww..","...bbbww..","..bb..bb.."];
-  const AC=[".BBB.","BBBBB",".nnn.",".nnn.","..n.."];
+  const PAL={"0":"#3B2414","1":"#8A4A1E","2":"#C9772F","3":"#E9A55A","5":"#1A1008","8":"#D7263D",b:"#8A5A33",B:"#5E3A1E",g:"#3E8E2A"};
+  // 옆모습 봉군이 (오른쪽을 봄), 다리 두 가지 모양으로 걷기
+  const HEAD=[".........0000.","........033330","2.......031350","22......033335",".220000088330.","..0222222220..","..0222222220.."];
+  const LEG1=["...020..020...","...020..020...","...00...00...."];
+  const LEG2=["..020....020..","..020....020..","..00.....00..."];
+  const SQUAT=["...0220.0220..","..00000.0000.."]; // 쪼그려 앉은 다리
+  const POOP=["..B..",".BbB.","BbbbB","bbbbb"];
   const cv=document.getElementById("sq"), x=cv.getContext("2d"), U=8, W=cv.width, H=cv.height, GROUND=H-16;
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let raf=0, sx=20, dir=1, t=0, got=0, acorns=[];
-  const spawn=()=>({x:40+Math.random()*(W-120), wait:0});
-  function sprite(g, px, py, flip){
-    g.forEach((row,ry)=>[...row].forEach((ch,rx)=>{ if(ch==="."||!PAL[ch]) return;
-      x.fillStyle=PAL[ch]; x.fillRect(flip? px+(row.length-1-rx)*U : px+rx*U, py+ry*U, U, U); }));
-  }
+  const DW=14*U, STOP=Math.round((W-DW)/2);
+  let raf=0, sx=-DW, t=0, phase="walk", wait=0, poops=[];
+  const say = (m)=>{ document.getElementById("acorns").textContent = m; };
+  function sprite(g, px, py){ g.forEach((row,ry)=>[...row].forEach((ch,rx)=>{ if(ch==="."||!PAL[ch]) return;
+    x.fillStyle=PAL[ch]; x.fillRect(px+rx*U, py+ry*U, U, U); })); }
   function frame(){
     t++; x.clearRect(0,0,W,H);
     x.fillStyle="#62B43A"; x.fillRect(0,GROUND,W,16); x.fillStyle=PAL.g; x.fillRect(0,GROUND,W,4);
-    acorns.forEach(a=>{ if(a.wait>0){ a.wait--; if(!a.wait) Object.assign(a,spawn()); } else sprite(AC,a.x,GROUND-5*U,false); });
-    if(!still){ sx += dir*5; if(sx>W-10*U-10){dir=-1;} if(sx<10){dir=1;} }
-    const hop = still ? 0 : Math.abs(Math.sin(t/5))*18;
-    const cx = sx+5*U;
-    acorns.forEach(a=>{ if(!a.wait && Math.abs(a.x+2.5*U-cx)<3*U){ a.wait=40; got++; document.getElementById("acorns").textContent=`도토리 ${got}개 주웠어요`; } });
-    sprite(SQ, sx, GROUND-8*U-hop, dir<0);
+    poops.forEach(px=>sprite(POOP, px, GROUND-4*U));
+    if (phase==="walk") {
+      if(!still) sx += 4;
+      if (sx >= STOP && !poops.length) { phase="squat"; wait=70; say("봉군이가 잠깐 멈췄어요..."); }
+      if (sx > W) { sx=-DW; poops=[]; }
+      const legs = (Math.floor(t/6)%2) ? LEG1 : LEG2;
+      sprite(HEAD.concat(legs), sx, GROUND-10*U);
+    } else { // squat: body lowered, tail up, then a little poop appears behind
+      sprite(HEAD.concat(SQUAT), sx, GROUND-9*U);
+      if (wait === 30) { poops.push(sx - 4*U); say("시원하다! 다시 산책 가요 🐾"); }
+      if (--wait <= 0) { phase="walk"; }
+    }
     raf=requestAnimationFrame(frame);
   }
   return {
-    start(){ got=0; sx=20; dir=1; acorns=[spawn(),spawn(),spawn()]; document.getElementById("acorns").textContent=""; cancelAnimationFrame(raf); frame(); },
+    start(){ sx=-DW; t=0; phase="walk"; poops=[]; say(""); cancelAnimationFrame(raf); frame(); },
     stop(){ cancelAnimationFrame(raf); },
   };
 })();
@@ -582,7 +597,7 @@ const TYPES = {
      fact:"다른 강아지는 무서워해요"},
 };
 const KEYS = ["w","n","s","g"], LET = ["A","B","C","D"];
-let i = 0, score = {w:0,n:0,s:0,g:0};
+let i = 0, score = {w:0,n:0,s:0,g:0}, picks = [];
 const $ = id => document.getElementById(id);
 
 function show(){
@@ -594,14 +609,16 @@ function show(){
     const b = document.createElement("button");
     b.type="button"; b.className="opt";
     b.innerHTML = `<b>${LET[k]}</b><span></span>`; b.lastChild.textContent = t;
-    b.onclick = ()=>{ score[KEYS[k]]++; i++; i<QS.length ? show() : finish(); };
+    b.onclick = ()=>{ score[KEYS[k]]++; picks.push(KEYS[k]); i++; i<QS.length ? show() : finish(); };
     $("opts").appendChild(b);
   });
 }
 let lastResult = "";
 function finish(){
   setTimeout(() => track("2-결과-" + $("rType").textContent.replace(/\s/g, "")), 0);
-  const top = KEYS.reduce((a,b)=> score[b]>score[a]?b:a, "w");
+  // 동점이면 마지막에 고른 답 쪽으로 (예전엔 항상 산책 메이트형으로 가서 결과가 쏠렸어요)
+  const best = Math.max(...KEYS.map(k=>score[k]));
+  const top = [...picks].reverse().find(k=>score[k]===best);
   showResult(top, 82 + score[top]*3); // 85~100
 }
 function showResult(top, pct){
@@ -638,7 +655,7 @@ addEventListener("hashchange", preview); preview();
 // 카톡 안에서 열리면 처음부터 진짜 브라우저로 넘겨요 (한 번만)
 if (IN_KAKAO) { try{ if (!sessionStorage.getItem("ext")) { sessionStorage.setItem("ext","1"); location.href = externalUrl(); } }catch(e){} }
 $("go").onclick = ()=>{ track("1-테스트시작"); $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
-$("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
+$("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; picks=[]; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 
 // 봉군이 사진 넘기기: swipe works natively (scroll-snap); buttons and counter follow the scroll position
 (function gallery(){

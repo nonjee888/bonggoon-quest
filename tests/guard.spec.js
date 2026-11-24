@@ -74,7 +74,7 @@ test("사진 용량: 장당 400KB 이하", () => {
 for (const [picks, type, pct] of [
   [[0, 0, 0, 1, 1, 2], "산책 메이트형", "91%"],     // A 3개 → 82 + 3×3
   [[1, 1, 1, 1, 2, 3], "동네 마실 단짝형", "94%"],  // B 4개
-  [[0, 0, 1, 1, 2, 3], "산책 메이트형", "88%"],     // A·B 동점 → 앞 순서(A)
+  [[0, 0, 1, 1, 2, 3], "동네 마실 단짝형", "88%"], // A·B 동점 → 마지막에 고른 B
   [[2, 2, 3, 3, 3, 0], "든든한 보디가드형", "91%"],  // D 3개
 ]) {
   test(`점수 규칙: ${picks.join("")} → ${type} ${pct}`, async ({ page }) => {
@@ -244,9 +244,25 @@ test("통계를 켜면 시작·결과·공유·신청서 클릭이 이벤트로 
   await page.goto("./");
   await play(page, [1, 1, 1, 1, 1, 1]);
   await page.getByRole("button", { name: "카카오톡으로 공유하기" }).click();
-  await page.locator('#result a[href*="docs.google.com/forms"]').evaluate((a) => { a.addEventListener("click", (e) => e.preventDefault()); a.click(); });
+  await page.locator('#result a[href*="docs.google.com/forms"]').first().evaluate((a) => { a.addEventListener("click", (e) => e.preventDefault()); a.click(); });
   const ev = await page.evaluate(() => window.__events);
   const paths = ev.map((e) => e.path);
   expect(paths).toEqual(expect.arrayContaining(["event/1-테스트시작", "event/2-결과-동네마실단짝형", "event/3-공유-카톡", "event/4-입양신청서클릭"]));
   for (const e of ev) expect(Object.keys(e).sort()).toEqual(["event", "path", "title"]);
+});
+
+test("휴대폰 첫 화면에서 시작 버튼이 스크롤 없이 보인다", async ({ page }) => {
+  test.skip(test.info().project.name !== "android", "휴대폰 화면 전용");
+  await page.goto("./");
+  const box = await page.locator("#go").boundingBox();
+  const vh = page.viewportSize().height;
+  expect(box.y + box.height).toBeLessThanOrEqual(vh);
+});
+
+test("면허증 바로 아래에 입양 신청서 한 줄이 있다", async ({ page }) => {
+  await page.goto("./");
+  await play(page, [0, 0, 0, 0, 0, 0]);
+  const line = page.locator("#result .meetline");
+  await expect(line).toBeVisible();
+  expect(await line.getAttribute("href")).toBe(ADOPT);
 });

@@ -43,7 +43,7 @@ test("결과가 나오면 프로필 버튼은 숨고 결과 화면에 입양·�
   await playQuiz(page, 0);
   await expect(page.locator("#profileCta")).toBeHidden();
   const result = page.locator("#result");
-  await expect(result.getByRole("link", { name: "입양 신청서" })).toBeVisible();
+  await expect(result.getByRole("link", { name: "입양 신청서", exact: true })).toBeVisible();
   await expect(result.getByRole("link", { name: "봉군이 인스타 @im.bonggoon" })).toBeVisible();
   await expect(result.getByRole("button", { name: "면허증 이미지 저장하기" })).toBeVisible();
   await expect(result.getByRole("button", { name: /인스타 스토리/ })).toBeVisible();
