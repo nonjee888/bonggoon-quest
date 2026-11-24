@@ -481,9 +481,10 @@ document.getElementById("kakao").onclick = shareKakao;
     bong:[".....000000.....","...0033333300...","..010333333010..",".01123333332110.",".01122333322110.",".01125233252110.",".01122233222110.","..012244442210..","..012445544210..","...0244774420...","...0888888880...","..022289982220..","..022449944220..","..022444444220..","...0000000000..."],
     rabbit:[".W.W..",".W.W..",".WnW..","WWWWW.","WkWWW.","WWWWWW",".WWWWW",".W..W."],
   };
-  const PLACE=[["rose",27,39],["rabbit",225,21],["barley",354,126],["sprout",129,144],["squirrel",45,240],["tulip",279,225],["skunk",156,339],["sprout",369,354],["bong",250,282]];
+  const PLACE=[["rose",27,39],["rabbit",225,21],["barley",354,126],["sprout",129,144],["squirrel",45,240],["tulip",279,225],["skunk",156,339],["sprout",369,354],
+    ["bong",250,290,.45],["bong",90,118,.45],["bong",300,36,.45],["bong",20,328,.45],["bong",360,212,.45]];
   // phone only: extra sprites in the gaps so the dense tile shows more
-  const MORE=[["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["tulip",60,345],["rabbit",290,370]];
+  const MORE=[["bong",2,92,.45],["bong",48,192,.45],["bong",2,280,.45],["tulip",120,40],["sprout",300,90],["rose",200,120],["rabbit",30,130],["barley",190,195],["sprout",130,262],["tulip",60,345],["rabbit",290,370]];
   // ponytail: two sizes only — phone (f=0.8: small, dense tile) and monitor (f=2); positions are in f=1 units, tile = 30 checker cells so it repeats seamlessly
   const mq = matchMedia("(min-width: 700px)");
   function draw(){
@@ -491,9 +492,10 @@ document.getElementById("kakao").onclick = shareKakao;
     c.width=c.height=T*S; const x=c.getContext("2d");
     x.fillStyle="#62B43A"; x.fillRect(0,0,T*S,T*S); x.fillStyle="#58A833";
     for(let gy=0;gy<T;gy+=C) for(let gx=0;gx<T;gx+=C) if(((gx+gy)/C)%2) x.fillRect(gx*S,gy*S,C*S,C*S);
-    for(const [name,px,py] of (mq.matches ? PLACE : PLACE.concat(MORE))) SP[name].forEach((row,ry)=>[...row].forEach((ch,rx)=>{
-      if(ch===".") return; x.fillStyle=PAL[ch]; x.fillRect((Math.round(px*f)+rx*U)*S,(Math.round(py*f)+ry*U)*S,U*S,U*S);
-    }));
+    for(const [name,px,py,sc] of (mq.matches ? PLACE : PLACE.concat(MORE))) { const u = Math.max(2, Math.round(U*(sc||1)));
+      SP[name].forEach((row,ry)=>[...row].forEach((ch,rx)=>{
+      if(ch===".") return; x.fillStyle=PAL[ch]; x.fillRect((Math.round(px*f)+rx*u)*S,(Math.round(py*f)+ry*u)*S,u*S,u*S);
+    })); }
     try{ document.body.style.backgroundImage=`url(${c.toDataURL()})`; document.body.style.backgroundSize=`${T}px ${T}px`; }catch(e){}
   }
   draw(); mq.addEventListener?.("change", draw);
