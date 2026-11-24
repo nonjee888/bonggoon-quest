@@ -357,8 +357,25 @@ async function buildLicense(W=1080, H=1920, topOnly=false){
   x.fillStyle="#62B43A"; x.fillRect(0,0,W,H); x.fillStyle="#58A833";
   for(let gy=0;gy<H;gy+=40) for(let gx=0;gx<W;gx+=40) if(((gx+gy)/40)%2) x.fillRect(gx,gy,40,40);
   const sh = topOnly ? Math.min(card.height, card.width*1.35) : card.height;
-  const k = Math.min((W-80)/card.width, (H-80)/sh), w = card.width*k, h = sh*k;
-  x.drawImage(card,0,0,card.width,sh,(W-w)/2,(H-h)/2,w,h);
+  if (topOnly) {
+    const k = Math.min((W-80)/card.width, (H-80)/sh), w = card.width*k, h = sh*k;
+    x.drawImage(card,0,0,card.width,sh,(W-w)/2,(H-h)/2,w,h);
+  } else {
+    // 스토리용: 위 '너도 해 봐' 안내 → 면허증 → 아래 입양 문구 → 링크·멘션 스티커 붙일 빈 공간
+    try { await document.fonts.ready; } catch(e) {}
+    const sign = (X,Y,w,h,fill) => { x.fillStyle="#2B1D10"; x.fillRect(X+12,Y+12,w,h); x.fillRect(X,Y,w,h); x.fillStyle=fill; x.fillRect(X+7,Y+7,w-14,h-14); };
+    sign(70, 90, 940, 170, "#FFF4D2");
+    x.textBaseline = "alphabetic"; x.textAlign = "left";
+    x.fillStyle = "#2B1D10"; x.font = "52px 'Do Hyeon', 'Gothic A1', sans-serif"; x.fillText("나의 봉군이 산책 궁합 🐶", 110, 168);
+    x.fillStyle = "#E2622A"; x.font = "700 34px 'Gothic A1', sans-serif"; x.fillText("너도 해 봐! 링크는 @im.bonggoon 프로필에", 110, 228);
+    const k = Math.min(860/card.width, 1180/card.height), w = card.width*k, h = card.height*k, X = (W-w)/2, Y = 300;
+    x.fillStyle = "#2B1D10"; x.fillRect(X+12, Y+12, w, h);
+    x.drawImage(card, X, Y, w, h);
+    const by = Y + h + 40;
+    sign(150, by, 780, 90, "#FFF4D2");
+    x.fillStyle = "#2B1D10"; x.font = "700 34px 'Gothic A1', sans-serif"; x.textAlign = "center";
+    x.fillText("봉군이는 평생 가족을 기다리고 있어요 🏡", W/2, by + 57);
+  }
   // JPEG: Instagram's share target rejects some PNGs; fall back to dataURL if toBlob gives null (older iOS)
   let blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.92));
   if (!blob) blob = await (await fetch(c.toDataURL("image/jpeg",0.92))).blob();
