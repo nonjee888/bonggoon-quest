@@ -121,8 +121,21 @@ test("다른 탭을 보고 있으면 캐러셀 자동 넘김이 멈춘다", asyn
 });
 
 // ── 개인정보 ─────────────────────────────────────────
+// Only look at the JPEG's metadata blocks (APPn/COM before the image data). Scanning the whole file
+// gave false alarms: compressed pixels can randomly contain bytes like "GPS" or "apple".
+function metaBytes(buf) {
+  if (buf[0] !== 0xff || buf[1] !== 0xd8) return buf; // not JPEG (PNG etc.): check whole file
+  const parts = []; let i = 2;
+  while (i + 4 <= buf.length && buf[i] === 0xff) {
+    const m = buf[i + 1], len = buf.readUInt16BE(i + 2);
+    if (m === 0xda) break; // start of image data
+    if ((m >= 0xe0 && m <= 0xef) || m === 0xfe) parts.push(buf.subarray(i + 4, i + 2 + len));
+    i += 2 + len;
+  }
+  return Buffer.concat(parts);
+}
 function metaProblems(buf) {
-  const s = buf.toString("latin1");
+  const s = metaBytes(buf).toString("latin1");
   const out = [];
   if (s.includes("GPS")) out.push("GPS 위치");
   if (/samsung|galaxy|iphone|apple|canon|nikon/i.test(s)) out.push("기기 정보");
@@ -146,7 +159,7 @@ test("사용자가 저장하는 면허증 이미지에도 위치·기기 정보�
   const [d] = await Promise.all([page.waitForEvent("download"), link.click()]);
   const buf = fs.readFileSync(await d.path());
   expect(metaProblems(buf)).toEqual([]);
-  expect(buf.toString("latin1")).not.toContain("Exif");
+  expect(metaBytes(buf).toString("latin1")).not.toContain("Exif");
 });
 
 // ── 보안 ─────────────────────────────────────────────
