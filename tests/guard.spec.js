@@ -197,3 +197,43 @@ test("저장소에 비밀 키나 토큰이 없다 (카카오 JavaScript 키는 �
   expect(keys.length).toBeLessThanOrEqual(1);
   if (keys.length) expect(html).toMatch(/const KAKAO_JS_KEY = "[0-9a-f]{32}"/);
 });
+
+// ── 링크 미리보기 ────────────────────────────────────
+test("링크 미리보기 이미지는 1200×630, 메타 태그가 맞다", async ({ page }) => {
+  await page.goto("./");
+  const og = await page.locator('meta[property="og:image"]').getAttribute("content");
+  expect(og).toMatch(/\/img\/og\.jpg$/);
+  expect(await page.locator('meta[property="og:image:width"]').getAttribute("content")).toBe("1200");
+  expect(await page.locator('meta[property="og:image:height"]').getAttribute("content")).toBe("630");
+  const size = await page.evaluate(async () => { const i = new Image(); i.src = "img/og.jpg"; await i.decode(); return [i.naturalWidth, i.naturalHeight]; });
+  expect(size).toEqual([1200, 630]);
+});
+
+// ── 방문 통계 ────────────────────────────────────────
+test("통계 코드가 비어 있으면 통계 서버에 아무것도 보내지 않는다", async ({ page }) => {
+  const hits = [];
+  page.on("request", (r) => { if (/goatcounter|gc\.zgo\.at/.test(r.url())) hits.push(r.url()); });
+  await page.goto("./");
+  await play(page, [0, 0, 0, 0, 0, 0]);
+  expect(hits).toEqual([]);
+});
+
+test("통계를 켜면 시작·결과·공유·신청서 클릭이 이벤트로 기록된다 (개인정보 없이)", async ({ page }) => {
+  // 사이트 코드를 넣은 상태를 흉내 내고, 실제 통계 서버 대신 가짜로 받아요
+  await page.route(/\/(index\.html)?(\?.*)?$/, async (route) => {
+    const res = await route.fetch(); let body = await res.text();
+    body = body.replace('const GC_CODE = "";', 'const GC_CODE = "test";');
+    await route.fulfill({ response: res, body });
+  });
+  await page.route("**/gc.zgo.at/**", (r) => r.abort());
+  await page.addInitScript(() => { window.__trackTest = true; window.__events = [];
+    window.goatcounter = { count: (o) => window.__events.push(o) }; });
+  await page.goto("./");
+  await play(page, [1, 1, 1, 1, 1, 1]);
+  await page.getByRole("button", { name: "카카오톡으로 공유하기" }).click();
+  await page.locator('#result a[href*="docs.google.com/forms"]').evaluate((a) => { a.addEventListener("click", (e) => e.preventDefault()); a.click(); });
+  const ev = await page.evaluate(() => window.__events);
+  const paths = ev.map((e) => e.path);
+  expect(paths).toEqual(expect.arrayContaining(["event/테스트시작", "event/결과-동네마실단짝형", "event/카톡공유", "event/입양신청서"]));
+  for (const e of ev) expect(Object.keys(e).sort()).toEqual(["event", "path", "title"]);
+});
