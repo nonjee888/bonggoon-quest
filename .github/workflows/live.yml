@@ -1,15 +1,14 @@
 name: 배포 후 실제 사이트 테스트
 
 # GitHub Pages 배포가 끝나면 진짜 주소(github.io)에 같은 테스트를 한 번 더 돌려요
+# (Pages 배포는 "deployment_status" 이벤트로 알려줘요. workflow_run은 Pages 배포에는 걸리지 않아요)
 on:
-  workflow_run:
-    workflows: ["pages build and deployment"]
-    types: [completed]
+  deployment_status:
   workflow_dispatch:
 
 jobs:
   live:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'github-pages') }}
     runs-on: ubuntu-24.04  # Playwright 1.56 supports up to Ubuntu 24.04
     timeout-minutes: 15
     env:
