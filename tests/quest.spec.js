@@ -320,3 +320,44 @@ test("면허증을 저장하면 스토리 링크 스티커용 테스트 링크�
   const pu = new URL(page.url());
   expect(clip).toBe(pu.origin + pu.pathname + "?ref=story");
 });
+
+// ── 영어 버전 ──────────────────────────────────────────────────
+test.describe("한국어가 아닌 브라우저(영어)에서 열었을 때", () => {
+  test.use({ locale: "en-US" });
+
+  test("영어로 보이고, 면허증 저장 이미지까지 영어 / ?lang=ko 와 KO 버튼으로 한국어 전환", async ({ page }) => {
+    const shots = process.env.EN_SHOTS; // 스크린샷이 필요하면 폴더 경로를 넘겨요
+    await page.goto("./");
+    await expect(page.locator("#go")).toHaveText("▶ Check our walk match");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", /봉군이/); // 크롤러용 메타는 한국어
+    await expect(page.locator(".en-only").first()).toBeHidden(); // 결과 전이라 아직 숨은 결과 화면 안내
+    await expect(page.locator("#profileCta .en-only")).toHaveText(/adoption form is written in Korean/);
+    if (shots) await page.screenshot({ path: `${shots}/en-1-start.png` });
+
+    await page.locator("#go").click();
+    await expect(page.locator("#q")).toHaveText(/^Weekend morning/);
+    for (let q = 0; q < 6; q++) await page.locator("#opts .opt").nth(3).click();
+    await expect(page.locator("#rType")).toHaveText("Trusty Bodyguard");
+    await expect(page.locator("#rFact")).toHaveText("Bonggoon fun fact · Scared of other dogs");
+    await expect(page.locator("#result .en-only")).toBeVisible();
+    if (shots) await page.locator("#result").screenshot({ path: `${shots}/en-2-result.png` });
+
+    await page.getByRole("button", { name: "Save license image" }).click();
+    const link = page.locator("#openExternal");
+    await expect(link).toHaveText("Save photo", { timeout: 15_000 });
+    const [d] = await Promise.all([page.waitForEvent("download"), link.click()]);
+    if (shots) fs.copyFileSync(await d.path(), `${shots}/en-3-license.jpg`);
+
+    await page.getByRole("button", { name: "Close" }).click();
+    await page.getByRole("button", { name: "한국어로 보기" }).click();
+    await expect(page).toHaveURL(/[?&]lang=ko/);
+    await expect(page.locator("#go")).toHaveText("▶ 산책 궁합 알아보기");
+  });
+});
+
+test("?lang=en 이면 한국어 브라우저에서도 영어로 보인다", async ({ page }) => {
+  await page.goto("./?lang=en");
+  await expect(page.locator("#go")).toHaveText("▶ Check our walk match");
+  await expect(page.locator("#langBtn")).toHaveText("KO");
+});
