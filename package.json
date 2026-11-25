@@ -2,9 +2,12 @@
   "name": "bonggoon-quest",
   "private": true,
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "build:toss": "node toss/build.mjs && ait build"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.1"
+    "@apps-in-toss/web-framework": "^3.11.0",
+    "@playwright/test": "^1.56.1",
+    "esbuild": "^0.25.12"
   }
 }
