@@ -19,3 +19,15 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
   openURL(a.href).catch(() => {});
 }, true);
+
+// 마지막 답 → 결과 사이에 봉군이 산책 로딩을 잠깐 보여줘요 (미니앱에서만. finish·loaderOpen·loaderClose는 index.html 전역 함수)
+// 3초(상한): 걷기(~1.6초) → 볼일(~0.7초) → 다시 걷기(~2.7초)까지 보이는 시간 (60fps 기준, 느린 기기 여유 포함)
+document.addEventListener("DOMContentLoaded", () => {
+  const done = window.finish;
+  if (typeof done !== "function") return;
+  window.finish = () => {
+    const close = document.getElementById("loaderClose");
+    loaderOpen(); close.hidden = true; // 이미지 저장용 요소는 loaderOpen이 이미 숨겨요
+    setTimeout(() => { loaderClose(); close.hidden = false; done(); }, 3000);
+  };
+});
