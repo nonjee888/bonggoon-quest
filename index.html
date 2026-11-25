@@ -151,21 +151,24 @@ p{margin:0}
 @media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
 #loader{position:fixed;inset:0;z-index:50;overflow:auto;display:grid;place-items:center;background:rgba(43,29,16,.6);
   padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+.lang{position:absolute;top:max(8px,env(safe-area-inset-top,0px));right:max(8px,env(safe-area-inset-right,0px));z-index:10;cursor:pointer;
+  font-family:var(--pixel);font-size:10px;line-height:1;padding:7px 8px;color:#fff;background:var(--grass-dark);border:3px solid var(--ink)}
+.lang:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
 #sq{width:100%;height:auto;image-rendering:pixelated;background:var(--sky);border:3px solid var(--ink)}
 </style>
 
 <div class="wrap">
   <section class="hero" style="display:flex;flex-direction:column;gap:16px">
-    <div class="frame"><img src="img/apple.jpg" alt="머리 위에 초록 열매를 얹고 얌전히 앉아 있는 봉군이"></div>
+    <div class="frame"><img src="img/apple.jpg" alt="머리 위에 초록 열매를 얹고 얌전히 앉아 있는 봉군이" data-en-alt="Bonggoon sitting politely with a green fruit on his head"></div>
     <div class="sign">
-      <span class="tag" style="font-family:var(--display);font-size:16px;letter-spacing:0">봉군이의 가족을 찾고 있어요</span>
-      <h1>나와 <em>봉군이</em>,<br>산책 궁합은 몇 %?</h1>
-      <p>질문 6개로 봉군이와 나의 궁합을 알아보세요.</p>
+      <span class="tag" style="font-family:var(--display);font-size:16px;letter-spacing:0" data-en="Bonggoon is looking for a family">봉군이의 가족을 찾고 있어요</span>
+      <h1 data-en="You &amp; &lt;em&gt;Bonggoon&lt;/em&gt;,&lt;br&gt;what's your walk match?">나와 <em>봉군이</em>,<br>산책 궁합은 몇 %?</h1>
+      <p data-en="Six questions to find out how well you and Bonggoon would walk together.">질문 6개로 봉군이와 나의 궁합을 알아보세요.</p>
     </div>
   </section>
 
   <section id="start" class="cta">
-    <button class="btn" id="go" type="button">▶ 산책 궁합 알아보기</button>
+    <button class="btn" id="go" type="button" data-en="▶ Check our walk match">▶ 산책 궁합 알아보기</button>
     <div class="divider" aria-hidden="true"></div>
   </section>
 
@@ -177,117 +180,138 @@ p{margin:0}
 
   <section class="res" id="result" hidden>
     <div class="license">
-      <div class="top"><span>봉군이 산책 면허증</span><span id="rNo"></span></div>
+      <div class="top"><span data-en="Bonggoon Walking License">봉군이 산책 면허증</span><span id="rNo"></span></div>
       <div class="body">
         <div class="photo" id="rImg" role="img"></div>
         <div>
-          <div class="info"><div class="seal" aria-label="봉군이 공식 인증 도장"><img src="img/stamp.png" alt=""><span>봉군이<br>인증</span></div><div class="lbl">나와 봉군이는</div>
+          <div class="info"><div class="seal" aria-label="봉군이 공식 인증 도장" data-en-aria-label="Bonggoon's official seal"><img src="img/stamp.png" alt=""><span data-en="Bonggoon&lt;br&gt;approved">봉군이<br>인증</span></div><div class="lbl" data-en="You &amp; Bonggoon are">나와 봉군이는</div>
           <h2 class="type" id="rType"></h2>
-          <div class="lbl">궁합 지수</div>
+          <div class="lbl" data-en="Match score">궁합 지수</div>
           <div class="pct" id="rPct"></div></div>
         </div>
       </div>
       <p class="desc" id="rDesc"></p>
       <div class="stamp"><span id="rFact"></span></div>
     </div>
-    <a class="meetline" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener">🐶 봉군이를 실제로 만나 보고 싶다면<br><b>인스타 DM으로 편하게 물어보세요 →</b></a>
+    <a class="meetline" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener" data-en="🐶 Want to meet Bonggoon in person?&lt;br&gt;&lt;b&gt;Feel free to ask by Instagram DM →&lt;/b&gt;">🐶 봉군이를 실제로 만나 보고 싶다면<br><b>인스타 DM으로 편하게 물어보세요 →</b></a>
     <div class="sign">
       <span class="tag">SHARE</span>
-      <h2 class="panel-h">봉군이 소식을 퍼뜨려 주세요</h2>
-      <p class="small">봉군이는 평생 가족을 기다리는 8살 남자 강아지예요. 결과를 공유해 주시면 봉군이가 가족을 더 빨리 찾을 수 있어요.</p>
-      <button class="btn alt" id="saveImg" type="button">면허증 이미지 저장하기</button>
-      <button class="btn" id="storyBtn" type="button">인스타 스토리에 올리기</button>
+      <h2 class="panel-h" data-en="Please help spread the word about Bonggoon">봉군이 소식을 퍼뜨려 주세요</h2>
+      <p class="small" data-en="Bonggoon is an 8-year-old boy waiting for his forever family. Sharing your result helps him find that family sooner.">봉군이는 평생 가족을 기다리는 8살 남자 강아지예요. 결과를 공유해 주시면 봉군이가 가족을 더 빨리 찾을 수 있어요.</p>
+      <button class="btn alt" id="saveImg" type="button" data-en="Save license image">면허증 이미지 저장하기</button>
+      <button class="btn" id="storyBtn" type="button" data-en="Post to Instagram Story">인스타 스토리에 올리기</button>
       <span class="toast" id="saveToast" role="status"></span>
-      <button class="btn kakao" id="kakao" type="button">카카오톡으로 공유하기</button>
+      <button class="btn kakao" id="kakao" type="button" data-en="Share on KakaoTalk">카카오톡으로 공유하기</button>
       <span class="toast" id="toast" role="status"></span>
     </div>
     <div class="sign">
       <span class="tag">MEET</span>
-      <h2 class="panel-h">봉군이를 직접 만나고 싶다면</h2>
-      <p class="small">궁합은 재미로 봐 주세요. 진짜 인연은 입양 신청서에서 시작돼요.</p>
-      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener">입양 신청서</a>
-      <a class="btn alt" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener">봉군이 인스타 @im.bonggoon</a>
+      <h2 class="panel-h" data-en="Want to meet Bonggoon in person?">봉군이를 직접 만나고 싶다면</h2>
+      <p class="small" data-en="Please take the match score just for fun. The real connection starts with the adoption form.">궁합은 재미로 봐 주세요. 진짜 인연은 입양 신청서에서 시작돼요.</p>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener" data-en="Adoption form">입양 신청서</a>
+      <p class="small en-only" hidden>Heads-up: the adoption form is written in Korean.</p>
+      <a class="btn alt" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener" data-en="Bonggoon on Instagram @im.bonggoon">봉군이 인스타 @im.bonggoon</a>
     </div>
-    <button class="again" id="again" type="button">↺ 테스트 다시 하기</button>
+    <button class="again" id="again" type="button" data-en="↺ Take the test again">↺ 테스트 다시 하기</button>
   </section>
 
   <section class="res" id="preview" hidden></section>
 
   <section class="sign" id="profile">
     <span class="tag">PROFILE</span>
-    <h2 style="font-size:32px">안녕하세요,<br>저는 봉군이예요.</h2>
+    <h2 style="font-size:32px" data-en="Hello,&lt;br&gt;I'm Bonggoon.">안녕하세요,<br>저는 봉군이예요.</h2>
     <div class="stats">
-      <div class="stat"><span>나이</span><strong>8살</strong></div>
-      <div class="stat"><span>몸무게</span><strong>9.3kg</strong></div>
-      <div class="stat"><span>성별</span><strong>남아</strong></div>
+      <div class="stat"><span data-en="Age">나이</span><strong data-en="8 yrs">8살</strong></div>
+      <div class="stat"><span data-en="Weight">몸무게</span><strong>9.3kg</strong></div>
+      <div class="stat"><span data-en="Sex">성별</span><strong data-en="Male">남아</strong></div>
     </div>
     <ul class="traits">
-      <li>중성화를 마쳤고, 기본 케어가 가능해요.</li>
-      <li>차를 잘 타요.</li>
-      <li>산책을 아주 좋아해요.</li>
-      <li class="warn">다른 강아지를 무서워하지만 적응하면 괜찮아요.</li>
+      <li data-en="I'm neutered, and basic care is no problem.">중성화를 마쳤고, 기본 케어가 가능해요.</li>
+      <li data-en="I ride well in cars.">차를 잘 타요.</li>
+      <li data-en="I love walks.">산책을 아주 좋아해요.</li>
+      <li class="warn" data-en="I'm scared of other dogs, but I'm fine once I get used to them.">다른 강아지를 무서워하지만 적응하면 괜찮아요.</li>
     </ul>
-    <div class="gallery" role="region" aria-roledescription="사진 넘기기" aria-label="봉군이 사진">
+    <div class="gallery" role="region" aria-roledescription="사진 넘기기" aria-label="봉군이 사진" data-en-aria-roledescription="carousel" data-en-aria-label="Photos of Bonggoon">
       <div class="track" id="track" tabindex="0">
-        <img src="img/gal-03.jpg" alt="입을 벌리고 웃는 봉군이 얼굴" loading="eager">
-        <img src="img/gal-23.jpg" alt="파란 하늘 아래 산책하는 봉군이" loading="eager">
-        <img src="img/gal-08.jpg" alt="차 안에서 얼굴을 기댄 봉군이" loading="lazy">
-        <img src="img/gal-01.jpg" alt="벽에 기대 옆을 보는 봉군이" loading="lazy">
-        <img src="img/gal-17.jpg" alt="공원에서 간식을 보는 봉군이" loading="lazy">
-        <img src="img/gal-09.jpg" alt="베개에 얼굴을 묻은 봉군이" loading="lazy">
-        <img src="img/gal-04.jpg" alt="방석에 얌전히 앉은 봉군이" loading="lazy">
-        <img src="img/gal-29.jpg" alt="잔디밭을 신나게 달리는 봉군이" loading="lazy">
-        <img src="img/gal-27.jpg" alt="차 안에서 창밖을 보는 봉군이 뒷모습" loading="lazy">
-        <img src="img/gal-14.jpg" alt="크리스마스트리 옆에서 얼굴을 감싸인 봉군이" loading="lazy">
-        <img src="img/gal-18.jpg" alt="정수리 가마가 보이는 봉군이" loading="lazy">
-        <img src="img/gal-07.jpg" alt="벽에 기대 카메라를 보는 봉군이" loading="lazy">
-        <img src="img/gal-24.jpg" alt="보호소 시절 봉군이" loading="lazy">
-        <img src="img/gal-15.jpg" alt="목욕하다 흠뻑 젖은 봉군이" loading="lazy">
-        <img src="img/gal-06.jpg" alt="계단에서 정면을 보는 봉군이" loading="lazy">
-        <img src="img/gal-28.jpg" alt="차 안 방석에서 잠든 봉군이" loading="lazy">
-        <img src="img/gal-02.jpg" alt="방석 위에서 꾸벅꾸벅 조는 봉군이" loading="lazy">
-        <img src="img/gal-16.jpg" alt="밤 산책 중 차 옆에 선 봉군이" loading="lazy">
-        <img src="img/gal-26.jpg" alt="커튼 앞에서 고개 숙인 봉군이" loading="lazy">
-        <img src="img/gal-21.jpg" alt="회색 니트를 입고 올려다보는 봉군이" loading="lazy">
-        <img src="img/gal-25.jpg" alt="밤 산책길의 봉군이" loading="lazy">
-        <img src="img/gal-11.jpg" alt="방석에 기대 잠든 봉군이" loading="lazy">
-        <img src="img/gal-22.jpg" alt="니트와 하네스를 입고 선 봉군이" loading="lazy">
+        <img src="img/gal-03.jpg" alt="입을 벌리고 웃는 봉군이 얼굴" data-en-alt="Bonggoon smiling with his mouth open" loading="eager">
+        <img src="img/gal-23.jpg" alt="파란 하늘 아래 산책하는 봉군이" data-en-alt="Bonggoon on a walk under a blue sky" loading="eager">
+        <img src="img/gal-08.jpg" alt="차 안에서 얼굴을 기댄 봉군이" data-en-alt="Bonggoon resting his face in the car" loading="lazy">
+        <img src="img/gal-01.jpg" alt="벽에 기대 옆을 보는 봉군이" data-en-alt="Bonggoon leaning on a wall, looking sideways" loading="lazy">
+        <img src="img/gal-17.jpg" alt="공원에서 간식을 보는 봉군이" data-en-alt="Bonggoon eyeing a treat in the park" loading="lazy">
+        <img src="img/gal-09.jpg" alt="베개에 얼굴을 묻은 봉군이" data-en-alt="Bonggoon with his face buried in a pillow" loading="lazy">
+        <img src="img/gal-04.jpg" alt="방석에 얌전히 앉은 봉군이" data-en-alt="Bonggoon sitting politely on a cushion" loading="lazy">
+        <img src="img/gal-29.jpg" alt="잔디밭을 신나게 달리는 봉군이" data-en-alt="Bonggoon happily running across the grass" loading="lazy">
+        <img src="img/gal-27.jpg" alt="차 안에서 창밖을 보는 봉군이 뒷모습" data-en-alt="Bonggoon from behind, looking out the car window" loading="lazy">
+        <img src="img/gal-14.jpg" alt="크리스마스트리 옆에서 얼굴을 감싸인 봉군이" data-en-alt="Bonggoon getting his face cupped next to a Christmas tree" loading="lazy">
+        <img src="img/gal-18.jpg" alt="정수리 가마가 보이는 봉군이" data-en-alt="Bonggoon showing the hair whorl on top of his head" loading="lazy">
+        <img src="img/gal-07.jpg" alt="벽에 기대 카메라를 보는 봉군이" data-en-alt="Bonggoon leaning on a wall, looking at the camera" loading="lazy">
+        <img src="img/gal-24.jpg" alt="보호소 시절 봉군이" data-en-alt="Bonggoon back in his shelter days" loading="lazy">
+        <img src="img/gal-15.jpg" alt="목욕하다 흠뻑 젖은 봉군이" data-en-alt="Bonggoon soaking wet mid-bath" loading="lazy">
+        <img src="img/gal-06.jpg" alt="계단에서 정면을 보는 봉군이" data-en-alt="Bonggoon on the stairs, facing the camera" loading="lazy">
+        <img src="img/gal-28.jpg" alt="차 안 방석에서 잠든 봉군이" data-en-alt="Bonggoon asleep on a cushion in the car" loading="lazy">
+        <img src="img/gal-02.jpg" alt="방석 위에서 꾸벅꾸벅 조는 봉군이" data-en-alt="Bonggoon nodding off on a cushion" loading="lazy">
+        <img src="img/gal-16.jpg" alt="밤 산책 중 차 옆에 선 봉군이" data-en-alt="Bonggoon standing by a car on a night walk" loading="lazy">
+        <img src="img/gal-26.jpg" alt="커튼 앞에서 고개 숙인 봉군이" data-en-alt="Bonggoon with his head lowered in front of a curtain" loading="lazy">
+        <img src="img/gal-21.jpg" alt="회색 니트를 입고 올려다보는 봉군이" data-en-alt="Bonggoon in a gray knit, looking up" loading="lazy">
+        <img src="img/gal-25.jpg" alt="밤 산책길의 봉군이" data-en-alt="Bonggoon out on a night walk" loading="lazy">
+        <img src="img/gal-11.jpg" alt="방석에 기대 잠든 봉군이" data-en-alt="Bonggoon asleep against a cushion" loading="lazy">
+        <img src="img/gal-22.jpg" alt="니트와 하네스를 입고 선 봉군이" data-en-alt="Bonggoon standing in a knit sweater and harness" loading="lazy">
       </div>
       <div class="gnav">
-        <button class="gbtn" id="gPrev" type="button" aria-label="이전 사진">◀</button>
+        <button class="gbtn" id="gPrev" type="button" aria-label="이전 사진" data-en-aria-label="Previous photo">◀</button>
         <span class="gcount" id="gCount" aria-live="polite">1 / 23</span>
-        <button class="gbtn" id="gNext" type="button" aria-label="다음 사진">▶</button>
+        <button class="gbtn" id="gNext" type="button" aria-label="다음 사진" data-en-aria-label="Next photo">▶</button>
       </div>
     </div>
     <dl class="vax">
-      <h3>예방접종 이력</h3>
-      <dt>25.05.19</dt><dd>코로나, 켄넬코프</dd>
-      <dt>25.11.09</dt><dd>종합, 광견병</dd>
-      <dt>25.12.09</dt><dd>인플루엔자</dd>
+      <h3 data-en="Vaccination history">예방접종 이력</h3>
+      <dt data-en="2025-05-19">25.05.19</dt><dd data-en="Coronavirus, kennel cough">코로나, 켄넬코프</dd>
+      <dt data-en="2025-11-09">25.11.09</dt><dd data-en="Combination vaccine, rabies">종합, 광견병</dd>
+      <dt data-en="2025-12-09">25.12.09</dt><dd data-en="Influenza">인플루엔자</dd>
     </dl>
     <div class="cta" id="profileCta">
-      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener">입양 신청서</a>
-      <a class="btn alt" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener">봉군이 인스타 @im.bonggoon</a>
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdcckkiHbTn-x0gjlqb-BRrDe7F87Wl344HkJy17aFVPztpWA/viewform" target="_blank" rel="noopener" data-en="Adoption form">입양 신청서</a>
+      <p class="small en-only" hidden>Heads-up: the adoption form is written in Korean.</p>
+      <a class="btn alt" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener" data-en="Bonggoon on Instagram @im.bonggoon">봉군이 인스타 @im.bonggoon</a>
     </div>
   </section>
 
-  <footer class="ground">© 2026 봉군이 임시보호자<br>사진과 글을 무단으로 사용하지 말아 주세요.</footer>
+  <footer class="ground" data-en="© 2026 Bonggoon's foster carer&lt;br&gt;Please don't use the photos or text without permission.">© 2026 봉군이 임시보호자<br>사진과 글을 무단으로 사용하지 말아 주세요.</footer>
 
-  <div id="loader" hidden role="dialog" aria-modal="true" aria-label="면허증 만들기">
+  <div id="loader" hidden role="dialog" aria-modal="true" aria-label="면허증 만들기" data-en-aria-label="Making your license">
     <div class="sign" style="width:min(100%,360px);text-align:center">
       <canvas id="sq" width="640" height="200" aria-hidden="true"></canvas>
       <p id="loaderMsg" style="font-family:var(--display);font-size:22px">면허증을 만드는 중이에요...</p>
       <p id="acorns" class="small" aria-live="polite"></p>
       <p id="copyNote" class="small" role="status" hidden style="color:var(--grass-dark);font-weight:700"></p>
       <div id="qrBox" hidden style="background:#fff;padding:12px;border:3px solid var(--ink);align-self:center"></div>
-      <img id="readyImg" hidden alt="완성된 봉군이 산책 면허증" style="width:100%;max-height:60vh;object-fit:contain;background:var(--ink);border:3px solid var(--ink);-webkit-touch-callout:default">
+      <img id="readyImg" hidden alt="완성된 봉군이 산책 면허증" data-en-alt="Your finished Bonggoon walking license" style="width:100%;max-height:60vh;object-fit:contain;background:var(--ink);border:3px solid var(--ink);-webkit-touch-callout:default">
       <a class="btn alt" id="openExternal" hidden>다른 브라우저로 열기</a>
       <button class="btn" id="shareNow" type="button" hidden></button>
-      <button class="btn alt" id="loaderClose" type="button">닫기</button>
+      <button class="btn alt" id="loaderClose" type="button" data-en="Close">닫기</button>
     </div>
   </div>
 </div>
 
+<button class="lang" id="langBtn" type="button"></button>
+<script>
+// 언어: IP 위치 대신 브라우저 언어(navigator.languages)로 정해요. 정적 사이트라 서버에서 위치를 알 수 없고,
+// 외부 IP 조회 API는 느리고 개인정보 부담이 있어서예요. 'ko'로 시작하는 언어가 하나라도 있으면 한국어, 없으면 영어.
+// ?lang=ko / ?lang=en 으로 강제할 수 있어요. 소스의 html lang·title·og 메타는 크롤러용으로 한국어 그대로 둬요.
+const LANG_Q = new URLSearchParams(location.search).get("lang");
+const EN = LANG_Q === "en" || (LANG_Q !== "ko" && !(navigator.languages || [navigator.language]).some((l) => /^ko/i.test(l || "")));
+const L = (ko, en) => EN ? en : ko;
+if (EN) {
+  document.documentElement.lang = "en"; document.title = "Bonggoon Walk Match Test";
+  // data-en → 글자(우리가 쓴 고정 문구라 innerHTML OK), data-en-alt / data-en-aria-label … → 그 속성
+  for (const el of document.querySelectorAll("*")) for (const a of [...el.attributes])
+    if (a.name === "data-en") el.innerHTML = a.value; else if (a.name.startsWith("data-en-")) el.setAttribute(a.name.slice(8), a.value);
+  document.querySelectorAll(".en-only").forEach((el) => { el.hidden = false; });
+}
+{ const b = document.getElementById("langBtn");
+  b.textContent = L("EN", "KO"); b.setAttribute("aria-label", L("Switch to English", "한국어로 보기"));
+  b.onclick = () => { const u = new URL(location.href); u.searchParams.set("lang", EN ? "ko" : "en"); location.href = u.href; }; }
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha384-3zSEDfvllQohrq0PHL1fOXJuC/jSOO34H46t6UQfobFOmxE5BpjjaIJY5F2/bMnU" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka" crossorigin="anonymous"></script>
@@ -332,7 +356,7 @@ function externalUrl(){
   if (IS_ANDROID) return "intent://" + u.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
   return "";
 }
-const EXT_LABEL = IN_KAKAO ? "다른 브라우저로 열기" : "크롬으로 열기";
+const EXT_LABEL = IN_KAKAO ? L("다른 브라우저로 열기", "Open in another browser") : L("크롬으로 열기", "Open in Chrome");
 const licFile = () => new File([readyBlob], "bonggoon-license.jpg", {type:"image/jpeg"});
 const canShareFile = () => !IN_APP && !!navigator.canShare?.({files:[licFile()]});
 
@@ -344,7 +368,7 @@ async function startLicense(m){
   try { navigator.clipboard?.writeText(STORY_LINK).then(()=>{ copied = true; }, ()=>{}); } catch(e) {}
   mode = m; track(m === "save" ? "3-공유-이미지저장버튼" : "3-공유-인스타스토리버튼");
   const toast = document.getElementById("saveToast"); toast.textContent = "";
-  if(!window.html2canvas){ toast.textContent = "지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요."; return; }
+  if(!window.html2canvas){ toast.textContent = L("지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요.", "Can't make the image right now. Please take a screenshot instead."); return; }
   loaderOpen();
   try{
     if (!readyBlob || readyFor !== lastResult) {
@@ -353,7 +377,7 @@ async function startLicense(m){
     } else await new Promise(r=>setTimeout(r,600));
     loaderDone();
   }catch(e){
-    loaderClose(); toast.textContent = "이미지를 만들지 못했어요. 화면을 캡처해 주세요.";
+    loaderClose(); toast.textContent = L("이미지를 만들지 못했어요. 화면을 캡처해 주세요.", "Couldn't make the image. Please take a screenshot instead.");
   }
 }
 // W×H canvas on pixel grass; topOnly keeps just the card's upper part (photo, type, %) for small thumbnails
@@ -372,7 +396,7 @@ async function buildLicense(W=1080, H=1920, topOnly=false){
     const sign = (X,Y,w,h,fill) => { x.fillStyle="#2B1D10"; x.fillRect(X+12,Y+12,w,h); x.fillRect(X,Y,w,h); x.fillStyle=fill; x.fillRect(X+7,Y+7,w-14,h-14); };
     sign(70, 50, 940, 110, "#FFF4D2");
     x.textBaseline = "alphabetic"; x.textAlign = "center";
-    x.fillStyle = "#2B1D10"; x.font = "56px 'Do Hyeon', 'Gothic A1', sans-serif"; x.fillText("나의 봉군이 산책 궁합 🐶", W/2, 125);
+    x.fillStyle = "#2B1D10"; x.font = "56px 'Do Hyeon', 'Gothic A1', sans-serif"; x.fillText(L("나의 봉군이 산책 궁합 🐶", "My walk match with Bonggoon 🐶"), W/2, 125);
     // 면허증을 최대한 크게 (아래 입양 문구 + 스티커 붙일 공간 약 150px은 남겨요)
     const k = Math.min(1000/card.width, 1450/card.height), w = card.width*k, h = card.height*k, X = (W-w)/2, Y = 195;
     x.fillStyle = "#2B1D10"; x.fillRect(X+12, Y+12, w, h);
@@ -380,7 +404,7 @@ async function buildLicense(W=1080, H=1920, topOnly=false){
     const by = Y + h + 30;
     sign(150, by, 780, 90, "#FFF4D2");
     x.fillStyle = "#2B1D10"; x.font = "700 34px 'Gothic A1', sans-serif"; x.textAlign = "center";
-    x.fillText("봉군이는 평생 가족을 기다리고 있어요 🏡", W/2, by + 57);
+    x.fillText(L("봉군이는 평생 가족을 기다리고 있어요 🏡", "Bonggoon is waiting for a forever family 🏡"), W/2, by + 57);
   }
   // JPEG: Instagram's share target rejects some PNGs; fall back to dataURL if toBlob gives null (older iOS)
   let blob = await new Promise(r=>c.toBlob(r,"image/jpeg",0.92));
@@ -399,13 +423,13 @@ function showLink(text, href, download){ const a = document.getElementById("open
 // ponytail: a real <a download> with a data: URL, tapped by the viewer — Android browsers fail scripted blob downloads ("저장에 실패했습니다")
 function offerDownload(msg){
   const r = new FileReader();
-  r.onload = ()=>{ setMsg(msg); showLink("사진 저장하기", r.result, "bonggoon-license.jpg"); document.getElementById("openExternal").className = "btn"; };
+  r.onload = ()=>{ setMsg(msg); showLink(L("사진 저장하기", "Save photo"), r.result, "bonggoon-license.jpg"); document.getElementById("openExternal").className = "btn"; };
   r.readAsDataURL(readyBlob);
 }
 // Pick what this browser can really do, and name the button after it
 function showCopyNote(){
   const n = document.getElementById("copyNote");
-  if (copied) { n.textContent = "🔗 테스트 링크가 복사됐어요! 스토리에서 링크 스티커를 누르고 붙여넣어 주세요."; n.hidden = false; }
+  if (copied) { n.textContent = L("🔗 테스트 링크가 복사됐어요! 스토리에서 링크 스티커를 누르고 붙여넣어 주세요.", "🔗 Test link copied! In your Story, tap the link sticker and paste it."); n.hidden = false; }
 }
 function loaderDone(){
   setTimeout(showCopyNote, 0);
@@ -414,27 +438,29 @@ function loaderDone(){
   const btn = document.getElementById("shareNow");
   if (mode === "save") {
     if (IN_APP) {
-      showImage(externalUrl() ? "이 앱 안에서는 바로 저장이 안 돼요. 아래 버튼으로 브라우저에서 열거나, 이미지를 꾹 눌러 저장해 주세요."
-                              : "이 앱 안에서는 바로 저장이 안 돼요. 이미지를 꾹 눌러 저장하거나, 오른쪽 위 ⋯ 메뉴에서 '외부 브라우저로 열기'를 눌러 주세요.");
+      showImage(externalUrl() ? L("이 앱 안에서는 바로 저장이 안 돼요. 아래 버튼으로 브라우저에서 열거나, 이미지를 꾹 눌러 저장해 주세요.",
+                                  "This app won't let you save directly. Open it in a browser with the button below, or press and hold the image to save it.")
+                              : L("이 앱 안에서는 바로 저장이 안 돼요. 이미지를 꾹 눌러 저장하거나, 오른쪽 위 ⋯ 메뉴에서 '외부 브라우저로 열기'를 눌러 주세요.",
+                                  "This app won't let you save directly. Press and hold the image to save it, or choose 'Open in external browser' from the ⋯ menu at the top right."));
       if (externalUrl()) showLink(EXT_LABEL, externalUrl());
     } else if (IS_IOS && canShareFile()) {
-      setMsg("면허증이 완성됐어요! 다음 화면에서 '이미지 저장'을 눌러 주세요.");
-      btn.textContent = "사진첩에 저장하기"; btn.hidden = false;
+      setMsg(L("면허증이 완성됐어요! 다음 화면에서 '이미지 저장'을 눌러 주세요.", "Your license is ready! On the next screen, tap 'Save Image'."));
+      btn.textContent = L("사진첩에 저장하기", "Save to Photos"); btn.hidden = false;
     } else {
-      offerDownload("면허증이 완성됐어요! 아래 버튼을 눌러 저장해 주세요.");
+      offerDownload(L("면허증이 완성됐어요! 아래 버튼을 눌러 저장해 주세요.", "Your license is ready! Tap the button below to save it."));
     }
   } else {
     if (canShareFile()) {
-      setMsg("면허증이 완성됐어요! 다음 화면에서 인스타그램 → 스토리를 골라 주세요.");
-      btn.textContent = "인스타그램으로 보내기"; btn.hidden = false;
+      setMsg(L("면허증이 완성됐어요! 다음 화면에서 인스타그램 → 스토리를 골라 주세요.", "Your license is ready! On the next screen, pick Instagram → Story."));
+      btn.textContent = L("인스타그램으로 보내기", "Send to Instagram"); btn.hidden = false;
     } else if (IN_APP && externalUrl()) {
-      showImage("이 앱 안에서는 인스타로 바로 보낼 수 없어요. 아래 버튼으로 브라우저에서 열면 바로 보낼 수 있어요.");
+      showImage(L("이 앱 안에서는 인스타로 바로 보낼 수 없어요. 아래 버튼으로 브라우저에서 열면 바로 보낼 수 있어요.", "This app can't send to Instagram directly. Open it in a browser with the button below and you can send it right away."));
       showLink(EXT_LABEL, externalUrl());
     } else if (IS_MOBILE) {
-      showImage("이미지를 꾹 눌러 저장한 뒤, 인스타그램 스토리에서 이 사진을 골라 주세요.");
-      showLink("인스타그램 열기", "instagram://story-camera");
+      showImage(L("이미지를 꾹 눌러 저장한 뒤, 인스타그램 스토리에서 이 사진을 골라 주세요.", "Press and hold the image to save it, then pick this photo in your Instagram Story."));
+      showLink(L("인스타그램 열기", "Open Instagram"), "instagram://story-camera");
     } else {
-      offerDownload("이미지를 저장한 뒤 휴대폰 인스타그램 스토리에 올려 주세요.");
+      offerDownload(L("이미지를 저장한 뒤 휴대폰 인스타그램 스토리에 올려 주세요.", "Save the image, then post it to your Instagram Story from your phone."));
     }
   }
 }
@@ -443,10 +469,10 @@ async function shareFile(){
   try{
     await navigator.share({files:[licFile()]});
     loaderClose();
-    toast.textContent = mode === "story" ? "인스타그램에서 스토리에 올려 주세요." : "";
+    toast.textContent = mode === "story" ? L("인스타그램에서 스토리에 올려 주세요.", "Now post it to your Story in Instagram.") : "";
   }catch(e){
     if (e && e.name === "AbortError") loaderClose();
-    else showImage("이미지를 꾹 눌러 사진첩에 저장해 주세요.");
+    else showImage(L("이미지를 꾹 눌러 사진첩에 저장해 주세요.", "Press and hold the image to save it to your photos."));
   }
 }
 document.getElementById("saveImg").onclick = ()=>startLicense("save");
@@ -459,9 +485,9 @@ function showQR(){
   const box = document.getElementById("qrBox"); box.innerHTML = ""; box.dataset.url = url; box.hidden = false;
   if (window.QRCode) new QRCode(box, { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
   else box.textContent = url;
-  setMsg("휴대폰 카메라로 찍으면 내 면허증이 그대로 열려요. 거기서 [인스타 스토리에 올리기]를 눌러 주세요.");
+  setMsg(L("휴대폰 카메라로 찍으면 내 면허증이 그대로 열려요. 거기서 [인스타 스토리에 올리기]를 눌러 주세요.", "Scan this with your phone camera to open your license there, then tap [Post to Instagram Story]."));
 }
-if (!IS_MOBILE) document.getElementById("storyBtn").textContent = "휴대폰으로 이어서 하기 (인스타 스토리)";
+if (!IS_MOBILE) document.getElementById("storyBtn").textContent = L("휴대폰으로 이어서 하기 (인스타 스토리)", "Continue on your phone (Instagram Story)");
 document.getElementById("storyBtn").onclick = ()=> IS_MOBILE ? startLicense("story") : showQR();
 document.getElementById("shareNow").onclick = ()=> mode === "kakao" ? sendKakao() : shareFile();
 document.getElementById("loaderClose").onclick = loaderClose;
@@ -489,13 +515,13 @@ const LD = (()=>{
     poops.forEach(px=>sprite(POOP, px, GROUND-4*U));
     if (phase==="walk") {
       if(!still) sx += 4;
-      if (sx >= STOP && !poops.length) { phase="squat"; wait=70; say("봉군이가 잠깐 멈췄어요..."); }
+      if (sx >= STOP && !poops.length) { phase="squat"; wait=70; say(L("봉군이가 잠깐 멈췄어요...", "Bonggoon has stopped for a moment...")); }
       if (sx > W) { sx=-DW; poops=[]; }
       const legs = (Math.floor(t/6)%2) ? LEG1 : LEG2;
       sprite(HEAD.concat(legs), sx, GROUND-10*U);
     } else { // squat: body lowered, tail up, then a little poop appears behind
       sprite(HEAD.concat(SQUAT), sx, GROUND-9*U);
-      if (wait === 30) { poops.push(sx - 4*U); say("시원하다! 다시 산책 가요 🐾"); }
+      if (wait === 30) { poops.push(sx - 4*U); say(L("시원하다! 다시 산책 가요 🐾", "Ahh, much better! Back to the walk 🐾")); }
       if (--wait <= 0) { phase="walk"; }
     }
     raf=requestAnimationFrame(frame);
@@ -507,7 +533,7 @@ const LD = (()=>{
   };
 })();
 function loaderOpen(){
-  document.getElementById("loaderMsg").textContent = "면허증을 만드는 중이에요...";
+  document.getElementById("loaderMsg").textContent = L("면허증을 만드는 중이에요...", "Making your license...");
   document.getElementById("shareNow").hidden = true;
   document.getElementById("readyImg").hidden = true; document.getElementById("openExternal").hidden = true; document.getElementById("openExternal").className = "btn alt";
   document.getElementById("sq").hidden = false; document.getElementById("qrBox").hidden = true; document.getElementById("copyNote").hidden = true;
@@ -521,7 +547,7 @@ let kakaoImg = null, kakaoFor = "";
 function copyFallback(){
   const toast = document.getElementById("toast");
   navigator.clipboard?.writeText(shareMsg).then(
-    ()=>{ toast.textContent = "공유 문구를 복사했어요. 카톡 대화방에 붙여 넣어 주세요."; },
+    ()=>{ toast.textContent = L("공유 문구를 복사했어요. 카톡 대화방에 붙여 넣어 주세요.", "Share message copied. Please paste it into a KakaoTalk chat."); },
     ()=>{ toast.textContent = shareMsg; });
 }
 function sendKakao(){
@@ -551,8 +577,8 @@ async function shareKakao(){
     kakaoImg = { url:o.url, width:o.width, height:o.height }; kakaoFor = lastResult;
   }catch(e){ kakaoImg = null; } // upload failed: send with the default photo instead
   LD.quiet();
-  setMsg("면허증이 완성됐어요!");
-  const btn = document.getElementById("shareNow"); btn.textContent = "카카오톡으로 보내기"; btn.hidden = false;
+  setMsg(L("면허증이 완성됐어요!", "Your license is ready!"));
+  const btn = document.getElementById("shareNow"); btn.textContent = L("카카오톡으로 보내기", "Send via KakaoTalk"); btn.hidden = false;
 }
 document.getElementById("kakao").onclick = shareKakao;
 
@@ -626,6 +652,32 @@ const TYPES = {
      desc:"봉군이 전담 경호원으로 발탁되셨습니다. 봉군이는 평소 뛰지 않는 양반이지만 다른 강아지 앞에서는 아주 빠르게 자취를 감춰요. 든든하게 앞에 서 주실 분을 찾고 있어요.",
      fact:"다른 강아지는 무서워해요"},
 };
+// English: same facts as the Korean text above, nothing added. Event names keep using the Korean TYPES names.
+const QS_EN = [
+  ["Weekend morning, eyes just opened. What do you want to do first?", ["Lace up and loop the neighborhood","Drive out of town for a bit","Sleep a little longer under the covers","Tidy the house and check the locks"]],
+  ["At a get-together, you're...", ["The first to say \"Let's go out!\"","The one who greets even total strangers","The one everyone feels at ease with","The one who looks after friends in unfamiliar places"]],
+  ["When you travel, you...", ["Do 20,000 steps a day, minimum","Take a road trip in a rental car","Lounge around at the hotel","Check on everyone's bags first"]],
+  ["On a rainy day, you...", ["Put on a raincoat and head out anyway","Go for a drive and listen to the rain","Watch a movie on the sofa","Go pick up whoever has no umbrella"]],
+  ["When a friend is going through a hard time, you...", ["Take a walk together to lift their mood","Drive them somewhere for some fresh air","Quietly stay by their side","Stand in front and shield them"]],
+  ["To you, a dog is...", ["A partner to walk with every day","A buddy who goes everywhere with you","Your sofa seatmate","Family you'll protect"]],
+];
+const TYPES_EN = {
+  w:{name:"Walk Mate", alt:"Bonggoon looking at a treat in an autumn park",
+     desc:"You are hereby appointed Bonggoon's official walk mate. Thanks to Bonggoon, his foster carer ranked in the top 2% for step count for a whole month straight. Please keep plenty of sneakers on hand.",
+     fact:"He's a walking pro, but he prefers quiet, empty paths. Bonggoon is a bit of a scaredy-cat, you see..."},
+  n:{name:"Neighborhood Buddy", alt:"Bonggoon resting his face on a cushion in the car",
+     desc:"You have been selected as Bonggoon's neighborhood outing buddy. Bonggoon rides calmly in the car and greets the neighbors nicely. The passenger seat will probably end up being Bonggoon's.",
+     fact:"Rides well in cars"},
+  s:{name:"Sofa Comrade", alt:"Bonggoon resting with his face buried in a pillow",
+     desc:"You are now officially recognized as a sofa comrade. Bonggoon truly doesn't need much looking after. Just give up one pillow and you're all set.",
+     fact:"8 yrs · 9.3kg · be ready to share half your pillow"},
+  g:{name:"Trusty Bodyguard", alt:"Bonggoon leaning on a wall, looking at the camera",
+     desc:"You have been chosen as Bonggoon's personal bodyguard. Bonggoon is a gentleman who doesn't usually run, but around other dogs he vanishes remarkably fast. He's looking for someone dependable to stand in front of him.",
+     fact:"Scared of other dogs"},
+};
+if (EN) QS.splice(0, QS.length, ...QS_EN);
+const T = k => EN ? {...TYPES[k], ...TYPES_EN[k]} : TYPES[k];
+const TMI = L("봉군이 TMI · ", "Bonggoon fun fact · ");
 const KEYS = ["w","n","s","g"], LET = ["A","B","C","D"];
 let i = 0, score = {w:0,n:0,s:0,g:0}, picks = [];
 const $ = id => document.getElementById(id);
@@ -645,23 +697,23 @@ function show(){
 }
 let lastResult = "";
 function finish(){
-  setTimeout(() => track("2-결과-" + $("rType").textContent.replace(/\s/g, "")), 0);
   // 동점이면 마지막에 고른 답 쪽으로 (예전엔 항상 산책 메이트형으로 가서 결과가 쏠렸어요)
   const best = Math.max(...KEYS.map(k=>score[k]));
   const top = [...picks].reverse().find(k=>score[k]===best);
   showResult(top, 82 + score[top]*3); // 85~100
+  track("2-결과-" + TYPES[top].name.replace(/\s/g, "")); // 이벤트 이름은 언어와 상관없이 한국어 유형 이름
 }
 function showResult(top, pct){
-  const t = TYPES[top];
+  const t = T(top), ko = TYPES[top];
   lastResult = `#result-${top}-${pct}`;
   $("start").hidden = true; $("quiz").hidden = true; $("result").hidden = false; $("profileCta").hidden = true;
   $("rType").textContent = t.name;
   $("rPct").textContent = pct + "%";
   const ph = $("rImg"); ph.style.backgroundImage = `url(${t.img})`; ph.style.backgroundPosition = t.pos; ph.setAttribute("aria-label", t.alt);
   $("rDesc").textContent = t.desc;
-  $("rFact").textContent = "봉군이 TMI · " + t.fact;
+  $("rFact").textContent = TMI + t.fact;
   $("rNo").textContent = "NO." + String(Math.floor(Math.random()*9000)+1000);
-  shareMsg = `나는 봉군이와 '${t.name}', 궁합 ${pct}%!\n가족을 기다리는 8살 봉군이와 너의 궁합도 확인해 봐 → ${SHARE_URL}`;
+  shareMsg = `나는 봉군이와 '${ko.name}', 궁합 ${pct}%!\n가족을 기다리는 8살 봉군이와 너의 궁합도 확인해 봐 → ${SHARE_URL}`;
   $("result").scrollIntoView({behavior:"smooth",block:"start"});
 }
 // ponytail: #licenses shows all four result cards at once, for the owner to review
@@ -670,11 +722,11 @@ function preview(){
   $("preview").hidden = !on;
   if (!on) return;
   $("preview").innerHTML = '<span class="tag">LICENSE PREVIEW · 4</span>' + KEYS.map(k=>{
-    const t = TYPES[k];
-    return `<div class="license"><div class="top"><span>봉군이 산책 면허증</span><span>NO.0000</span></div>
+    const t = T(k);
+    return `<div class="license"><div class="top"><span>${L("봉군이 산책 면허증", "Bonggoon Walking License")}</span><span>NO.0000</span></div>
       <div class="body"><div class="photo" role="img" aria-label="${t.alt}" style="background-image:url(${t.img});background-position:${t.pos}"></div><div>
-      <div class="info"><div class="seal" aria-label="봉군이 공식 인증 도장"><img src="img/stamp.png" alt=""><span>봉군이<br>인증</span></div><div class="lbl">나와 봉군이는</div><h2 class="type">${t.name}</h2><div class="lbl">궁합 지수</div><div class="pct">100%</div></div></div></div>
-      <p class="desc">${t.desc}</p><div class="stamp"><span>봉군이 TMI · ${t.fact}</span></div></div>`;
+      <div class="info"><div class="seal" aria-label="${L("봉군이 공식 인증 도장", "Bonggoon's official seal")}"><img src="img/stamp.png" alt=""><span>${L("봉군이<br>인증", "Bonggoon<br>approved")}</span></div><div class="lbl">${L("나와 봉군이는", "You &amp; Bonggoon are")}</div><h2 class="type">${t.name}</h2><div class="lbl">${L("궁합 지수", "Match score")}</div><div class="pct">100%</div></div></div></div>
+      <p class="desc">${t.desc}</p><div class="stamp"><span>${TMI}${t.fact}</span></div></div>`;
   }).join("");
   $("preview").scrollIntoView({block:"start"});
 }
