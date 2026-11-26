@@ -158,6 +158,12 @@ p{margin:0}
   font-family:var(--pixel);font-size:10px;line-height:1;padding:7px 8px;color:#fff;background:var(--grass-dark);border:3px solid var(--ink)}
 .lang:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
 #sq{width:100%;height:auto;image-rendering:pixelated;background:var(--sky);border:3px solid var(--ink)}
+/* 오늘의 봉군이: 버튼처럼 보이지 않게 그림자 없는 종이 카드 (누르는 요소 아님) */
+.today{gap:10px;padding:12px 14px}
+.today .tr{display:flex;align-items:center;gap:12px}
+.today img{flex:none;width:76px;height:76px;object-fit:cover;object-position:center 30%;border:3px solid var(--ink);background:var(--sign-lo)}
+.today .th{font-family:var(--display);font-size:16px;color:var(--grass-dark)}
+.today .tl{font-weight:700;font-size:15px;line-height:1.45;text-wrap:balance}
 </style>
 
 <div class="wrap">
@@ -172,6 +178,10 @@ p{margin:0}
 
   <section id="start" class="cta">
     <button class="btn" id="go" type="button" data-en="▶ Check our walk match">▶ 산책 궁합 알아보기</button>
+    <div class="sign today" id="today">
+      <p class="th"><span data-en="Bonggoon of the day">오늘의 봉군이</span><span style="white-space:nowrap"> · <span id="tdDate"></span></span></p>
+      <div class="tr"><img id="tdImg" alt="" width="76" height="76" loading="lazy" decoding="async"><p class="tl" id="tdLine"></p></div>
+    </div>
     <div class="divider" aria-hidden="true"></div>
   </section>
 
@@ -733,6 +743,39 @@ function preview(){
   }).join("");
   $("preview").scrollIntoView({block:"start"});
 }
+
+// 오늘의 봉군이: 한국 시간 날짜마다 gal-*.jpg를 파일 이름 순서대로 하나씩 (다 돌면 처음부터). 같은 날엔 누구에게나 같은 사진.
+// 문구는 사진에 보이는 것만 써요. 사진 설명(alt)은 갤러리 것을 그대로 가져와요.
+const TODAY = [
+  ["01","벽에 기대 생각에 잠겼어요","Leaning on the wall, lost in thought."],
+  ["02","구석 방석에서 꾸벅꾸벅 졸아요","Nodding off on the corner cushion."],
+  ["03","오늘은 입이 귀에 걸렸어요","Smiling from ear to ear today."],
+  ["04","방석 위에 아주 얌전히 앉았어요","Sitting very politely on his cushion."],
+  ["06","산책 줄 매고 출발 준비 끝났어요","Leash on, ready to head out."],
+  ["07","가슴 쓰다듬는 손에 몸을 맡겼어요","Enjoying a gentle chest rub."],
+  ["08","차 안 방석에 턱을 괴고 쉬어요","Resting his chin on a car cushion."],
+  ["09","베개에 얼굴을 폭 묻었어요","Face buried deep in the pillow."],
+  ["11","방석에 기대 단잠에 빠졌어요","Snoozing against his cushion."],
+  ["14","트리 옆에서 볼을 잡혀도 의젓해요","By the tree, calm even with his cheeks held."],
+  ["15","흠뻑 젖어도 꿋꿋이 앉아 있어요","Soaking wet, but sitting tight."],
+  ["16","밤 산책도 씩씩하게 나왔어요","Out bravely for a night walk."],
+  ["17","간식 앞에서는 눈빛이 달라져요","A treat appears, and his eyes change."],
+  ["18","오늘은 정수리 가마를 공개해요","Today's reveal: his crown whorl."],
+  ["21","니트 입고 가만히 올려다봐요","Looking up in his cozy knit."],
+  ["22","니트에 하네스까지, 외출 준비 완료","Knit and harness on, all set to go."],
+  ["23","파란 하늘 아래 산책 중이에요","Walking under a big blue sky."],
+  ["24","보호소 시절에도 의젓하게 앉았어요","Sitting tall, back in his shelter days."],
+  ["25","밤 산책길에 성큼성큼 다가와요","Striding toward you on a night walk."],
+  ["26","고개 숙이고 눈만 올려다봐요","Head down, eyes peeking up."],
+  ["27","차 안에서 창밖 구경 중이에요","Watching the world from the car."],
+  ["28","차 안 방석에서 곤히 자요","Sound asleep on his car cushion."],
+  ["29","잔디밭을 신나게 달려요","Running happily across the grass."],
+];
+{ const now = Date.now(), day = Math.floor((now + 9 * 36e5) / 864e5); // KST 자정에 바뀜
+  const [n, ko, en] = TODAY[day % TODAY.length], src = `img/gal-${n}.jpg`;
+  $("tdImg").src = src; $("tdImg").alt = document.querySelector(`#track img[src="${src}"]`)?.alt || "";
+  $("tdDate").textContent = new Date(now).toLocaleDateString(EN ? "en-US" : "ko-KR", { month: EN ? "short" : "long", day: "numeric", timeZone: "Asia/Seoul" });
+  $("tdLine").textContent = L(ko, en); }
 addEventListener("hashchange", preview); preview();
 // 다른 브라우저로 넘어왔을 때(#result-w-94) 같은 결과를 다시 보여줘요
 { const m = location.hash.match(/^#result-([wnsg])-(\d{2,3})$/) || location.search.match(/[?&]result=([wnsg])-(\d{2,3})/);
