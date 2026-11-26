@@ -1,12 +1,12 @@
 // 토스 미니앱 번들(dist/)에만 들어가요. GitHub Pages 사이트에는 이 파일이 없어서 아무 영향이 없어요.
-import { openURL } from "@apps-in-toss/web-framework";
+import { openURL, getTossShareLink, share } from "@apps-in-toss/web-framework";
 
 // GoatCounter 유입 꼬리표: 미니앱 방문은 "toss"로 집계돼요 (?ref=kakao·qr·story 와 같은 자리)
 window.goatcounter = { referrer: "toss" };
 
 // 앱인토스 정책: 공유 링크가 자사 웹사이트로 가면 안 되고(카톡·QR·스토리 링크 모두 github.io로 감),
 // 자사 채널 이동 유도도 막혀 있어요 → 공유 묶음과 인스타 링크만 숨겨요. 문구는 그대로예요.
-// ponytail: 숨기기만 함. 토스 공유(getTossShareLink + share)는 필요해지면 그때 붙여요.
+// 대신 결과 화면에 토스 공유(미니앱 링크) 버튼을 따로 붙여요 (아래).
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("kakao")?.closest(".sign")?.setAttribute("hidden", "");
   document.querySelectorAll('a[href*="instagram.com"]').forEach((a) => a.setAttribute("hidden", ""));
@@ -45,4 +45,27 @@ document.addEventListener("DOMContentLoaded", () => {
     loaderOpen(); close.hidden = true; // 이미지 저장용 요소는 loaderOpen이 이미 숨겨요
     setTimeout(() => { loaderClose(); close.hidden = false; done(); }, 3000);
   };
+});
+
+// 친구랑 궁합 비교: 토스 공유 링크(intoss://, 미니앱 첫 화면)를 공유 시트로 보내요. 외부(github.io) 링크는 쓰지 않아요.
+// 문서: developers-apps-in-toss.toss.im/documentation/common/growth/share/miniapp-share-link.md
+// 'bonggoon-quest'는 apps-in-toss.config.ts의 appName과 같아야 해요.
+// 토스 밖(로컬 브라우저)엔 브리지가 없어 버튼을 만들지 않아요.
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.ReactNativeWebView) return;
+  const en = document.documentElement.lang === "en";
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "btn"; b.id = "tossShare";
+  b.textContent = en ? "What's your friend's type? Send the match test" : "친구는 무슨 유형일까? 궁합 보내기";
+  b.onclick = async () => {
+    window.track?.("3-공유-토스");
+    const type = document.getElementById("rType").textContent;
+    try {
+      const link = await getTossShareLink("intoss://bonggoon-quest");
+      await share({ message: (en
+        ? `I'm a '${type}' with Bonggoon! What's your type? Try the Bonggoon walk match test`
+        : `나는 봉군이와 '${type}'! 너는 무슨 유형일까? 봉군이랑 산책 궁합 해 보기`) + "\n" + link });
+    } catch (e) {} // 공유 창을 닫거나 실패해도 조용히
+  };
+  document.querySelector("#result .license")?.after(b);
 });

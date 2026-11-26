@@ -11,6 +11,7 @@ npm run build:toss   # → dist/ + bonggoon-quest.ait
 
 - GoatCounter 유입이 `toss`로 집계돼요 (`?ref=kakao·qr·story`와 같은 자리).
 - 공유 묶음(이미지 저장·인스타 스토리·카카오톡)과 인스타 링크는 숨겨요. 공유 링크가 github.io로 가는 것과 자사 채널 유도는 앱인토스 정책상 막혀 있어요. 공유는 토스 내비게이션 바의 ⋯ 메뉴로 해요.
+- 결과 화면에 '친구는 무슨 유형일까? 궁합 보내기' 버튼을 붙여요: `getTossShareLink("intoss://bonggoon-quest")` + `share`로 미니앱 첫 화면 링크를 공유 (GoatCounter `3-공유-토스`). `appName`을 바꾸면 `toss/entry.js`의 이 주소도 같이 바꿔 주세요. 토스 밖에선 버튼이 안 생겨요.
 - 입양 신청서는 `openURL`로 기기 브라우저에서 열려요.
 - 핀치 줌을 막아요 (체크리스트 항목).
 - 마지막 질문에 답하면 봉군이 산책 로딩(최대 3초)을 보여준 뒤 결과가 나와요.

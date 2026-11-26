@@ -361,3 +361,26 @@ test("?lang=en 이면 한국어 브라우저에서도 영어로 보인다", asyn
   await expect(page.locator("#go")).toHaveText("▶ Check our walk match");
   await expect(page.locator("#langBtn")).toHaveText("KO");
 });
+
+test("오늘의 봉군이: 한국 시간 날짜마다 사진·문구가 바뀌고, 사진 수만큼 돌면 처음으로", async ({ page }) => {
+  const at = async (iso) => {
+    await page.clock.setFixedTime(new Date(iso));
+    await page.goto("./");
+    const card = page.locator("#today");
+    await expect(card).toBeVisible();
+    return { src: await page.locator("#tdImg").getAttribute("src"), date: await page.locator("#tdDate").textContent(),
+             line: await page.locator("#tdLine").textContent(), alt: await page.locator("#tdImg").getAttribute("alt") };
+  };
+  // 한국 자정 직후 (UTC로는 아직 전날) → 이미 27일 사진
+  const a = await at("2026-11-27T00:30:00+09:00");
+  expect(a).toMatchObject({ src: "img/gal-22.jpg", date: "11월 27일" });
+  expect(a.line.length).toBeGreaterThan(5);
+  expect(a.alt).not.toBe("");
+  const b = await at("2026-11-28T23:59:00+09:00");
+  expect(b).toMatchObject({ src: "img/gal-23.jpg", date: "11월 28일" });
+  expect(b.line).not.toBe(a.line);
+  // 사진 23장 → 23일 뒤엔 다시 같은 사진
+  expect((await at("2026-12-20T12:00:00+09:00")).src).toBe("img/gal-22.jpg");
+  // 같은 날의 사진 파일이 실제로 열리는지
+  expect((await page.request.get(a.src)).status()).toBe(200);
+});
