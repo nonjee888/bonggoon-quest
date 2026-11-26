@@ -375,9 +375,9 @@ test("봉군이 임보 일기: 처음 온 날 Day 1, 같은 날 다시 와도 �
   await expect(page.locator("#dMeta")).toHaveText("Day 1 · 10월 4일");
   await expect(page.locator("#dCap")).toHaveText("봉군이 임시보호 시작 🐕");
   await expect(page.locator("#dNew")).toBeVisible();
-  await expect(page.locator("#dCount")).toHaveText("모은 일기 1 / 35");
+  await expect(page.locator("#dCount")).toHaveText("모은 일기 1 / 34");
   await expect(grid.locator("button")).toHaveCount(1);
-  await expect(grid.locator("span")).toHaveCount(34);
+  await expect(grid.locator("span")).toHaveCount(33);
   expect((await page.request.get(await page.locator("#dImg").getAttribute("src"))).status()).toBe(200);
   // 같은 날 다시 와도 그대로, '새 일기' 표시 없음
   await visit("2026-11-26T23:59:00+09:00");
@@ -387,7 +387,7 @@ test("봉군이 임보 일기: 처음 온 날 Day 1, 같은 날 다시 와도 �
   await visit("2026-11-27T00:30:00+09:00");
   await expect(page.locator("#dMeta")).toHaveText("Day 2 · 10월 6일");
   await expect(page.locator("#dNew")).toBeVisible();
-  await expect(page.locator("#dCount")).toHaveText("모은 일기 2 / 35");
+  await expect(page.locator("#dCount")).toHaveText("모은 일기 2 / 34");
   await expect(grid.locator("button")).toHaveCount(2);
   // 며칠 건너뛰고 와도 1편만
   await visit("2026-12-05T12:00:00+09:00");
@@ -400,10 +400,10 @@ test("봉군이 임보 일기: 처음 온 날 Day 1, 같은 날 다시 와도 �
 });
 
 test("봉군이 임보 일기: 캡션 없는 날은 날짜만, 다 모으면 완료 문구, 영어 화면", async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("diary", JSON.stringify({ n: 34, last: "2000-01-01" })));
+  await page.addInitScript(() => localStorage.setItem("diary", JSON.stringify({ n: 35, last: "2000-01-01" })));
   await page.goto("./?lang=en");
-  await expect(page.locator("#dMeta")).toHaveText("Day 35 · Nov 26");
-  await expect(page.locator("#dCount")).toHaveText("Entries collected 35 / 35");
+  await expect(page.locator("#dMeta")).toHaveText("Day 34 · Nov 26");
+  await expect(page.locator("#dCount")).toHaveText("Entries collected 34 / 34");
   await expect(page.locator("#dDone")).toBeVisible();
   await expect(page.locator("#dGrid span")).toHaveCount(0);
   await page.getByRole("button", { name: "Show Day 4", exact: true }).click();
@@ -416,7 +416,20 @@ test("봉군이 임보 일기: localStorage가 막혀도 에러 없이 Day 1", a
   await page.addInitScript(() => { Object.defineProperty(window, "localStorage", { get() { throw new Error("blocked"); } }); });
   await page.goto("./");
   await expect(page.locator("#dMeta")).toHaveText("Day 1 · 10월 4일");
-  await expect(page.locator("#dCount")).toHaveText("모은 일기 1 / 35");
+  await expect(page.locator("#dCount")).toHaveText("모은 일기 1 / 34");
   await expect(page.locator("#go")).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test("큰 블록 사이 세로 간격은 첫 화면·결과 화면 모두 24px로 같다 (375px)", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  const gaps = (sels) => page.evaluate((sels) => {
+    const r = sels.flatMap((s) => [...document.querySelectorAll(s)]).filter((e) => e.getClientRects().length)
+      .map((e) => e.getBoundingClientRect()).sort((a, b) => a.top - b.top);
+    return r.slice(1).map((x, i) => Math.round(x.top - r[i].bottom));
+  }, sels);
+  await page.goto("./");
+  expect(await gaps([".hero > .frame", ".hero > .sign", "#go", "#diary", "#start > .divider", "#profile", "footer.ground"])).toEqual(Array(6).fill(24));
+  await playQuiz(page, 0);
+  expect(await gaps(["#result > *", "#profile", "footer.ground"])).toEqual(Array(6).fill(24));
 });

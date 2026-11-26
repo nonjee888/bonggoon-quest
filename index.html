@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gothic+A1:wght@400;700&family=Press+Start+2P&display=swap">
 <style>
 /* Layout: 픽셀 풀밭 — checkered grass ground, every block of content is a chunky wooden sign with hard pixel bevels. One column. */
-:root{
+:root{--gap:24px;
   --grass:#62B43A; --grass-2:#58A833; --grass-dark:#2F6B1C;
   --dirt:#8A5A33; --dirt-2:#73482A;
   --sign:#F4E3B5; --sign-hi:#FFF4D2; --sign-lo:#C9A063;
@@ -43,8 +43,8 @@ body{word-break:keep-all;overflow-wrap:break-word;background-color:var(--grass);
   background-size:28px 28px;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
 .wrap{max-width:480px;margin:0 auto;padding-block:20px 0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  display:flex;flex-direction:column;gap:34px}
-@media (max-width:699px){.wrap{gap:56px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}}
+  display:flex;flex-direction:column;gap:var(--gap)}
+@media (max-width:699px){.wrap{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}}
 h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.15;text-wrap:balance}
 p{margin:0}
 
@@ -105,7 +105,7 @@ p{margin:0}
 .license .pct{font-family:var(--pixel);font-size:24px;color:var(--accent);text-shadow:2px 2px 0 var(--ink);font-variant-numeric:tabular-nums}
 .license .desc{padding:0 14px 14px;font-size:15px;line-height:1.7}
 .license .stamp{margin:0 14px 14px;padding:10px 12px;background:var(--sign);border:3px dashed var(--sign-lo);font-size:13px;font-weight:700}
-.res{display:flex;flex-direction:column;gap:14px}
+.res{display:flex;flex-direction:column;gap:var(--gap)}
 .share-text{width:100%;box-sizing:border-box;font:inherit;font-size:14px;padding:12px;border:3px solid var(--ink);background:var(--sign-hi);color:var(--ink);resize:none}
 .toast{font-size:14px;font-weight:700;min-height:1.4em;color:var(--grass-dark)}
 
@@ -127,7 +127,7 @@ p{margin:0}
   box-shadow:inset -4px -4px 0 var(--sign-lo);width:52px;height:44px}
 .gbtn:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
 .gcount{font-family:var(--pixel);font-size:12px}
-.divider{height:12px;margin-top:22px;background:repeating-linear-gradient(90deg,var(--grass-dark) 0 14px,transparent 14px 22px)}
+.divider{height:12px;background:repeating-linear-gradient(90deg,var(--grass-dark) 0 14px,transparent 14px 22px)}
 .vax{background:var(--sign-hi);border:3px solid var(--ink);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:0;font-variant-numeric:tabular-nums}
 .vax h3{grid-column:1/-1;font-size:20px}
 .vax dt{font-weight:700;color:var(--grass-dark)}
@@ -146,7 +146,7 @@ p{margin:0}
 .again:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
 
 /* ground */
-.ground{margin-top:20px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
+.ground{margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
   background:var(--dirt);background-image:conic-gradient(var(--dirt-2) 25%,transparent 0 50%,var(--dirt-2) 0 75%,transparent 0);background-size:20px 20px;
   border-top:10px solid var(--grass-dark);padding:22px max(16px,env(safe-area-inset-left,0px)) 40px;text-align:center;font-size:13px;color:#F4E3B5}
 .ground a{color:#fff;font-weight:700}
@@ -177,7 +177,7 @@ p{margin:0}
 </style>
 
 <div class="wrap">
-  <section class="hero" style="display:flex;flex-direction:column;gap:16px">
+  <section class="hero" style="display:flex;flex-direction:column;gap:var(--gap)">
     <div class="frame"><img src="img/apple.jpg" alt="머리 위에 초록 열매를 얹고 얌전히 앉아 있는 봉군이" data-en-alt="Bonggoon sitting politely with a green fruit on his head"></div>
     <div class="sign">
       <span class="tag" style="font-family:var(--display);font-size:16px;letter-spacing:0" data-en="Bonggoon is looking for a family">봉군이의 가족을 찾고 있어요</span>
@@ -186,7 +186,7 @@ p{margin:0}
     </div>
   </section>
 
-  <section id="start" class="cta">
+  <section id="start" class="cta" style="gap:var(--gap)">
     <button class="btn" id="go" type="button" data-en="▶ Check our walk match">▶ 산책 궁합 알아보기</button>
     <div class="sign diary" id="diary">
       <p class="th"><span data-en="Bonggoon's foster diary">봉군이 임보 일기</span>&nbsp;· <span style="white-space:nowrap"><span data-en="Foster">임보</span> <span id="dDay"></span></span></p>
@@ -780,7 +780,6 @@ const DIARY = [
   ["d16","10-21","너눈을왜그렇게떠","Why are you making those eyes?",600,800],
   ["d17","10-22","끙카","Oof",600,800],
   ["d18","10-23","털색이 너무 예쁘시네요","What a lovely coat you have",600,800],
-  ["d19","10-23","오늘은 봉군이가 암바 냄새도 맡았다.","Today Bonggoon even got to sniff Armbar, a dog friend.",600,800],
   ["d20","10-24","많이 피곤한가봐...","He must be really tired...",800,800],
   ["d21","10-24","","",800,800],
   ["d22","10-25","귤선생 임봉군","Professor Tangerine, Lim Bonggoon",800,800],
