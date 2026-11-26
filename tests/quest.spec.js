@@ -420,3 +420,16 @@ test("봉군이 임보 일기: localStorage가 막혀도 에러 없이 Day 1", a
   await expect(page.locator("#go")).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("큰 블록 사이 세로 간격은 첫 화면·결과 화면 모두 24px로 같다 (375px)", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  const gaps = (sels) => page.evaluate((sels) => {
+    const r = sels.flatMap((s) => [...document.querySelectorAll(s)]).filter((e) => e.getClientRects().length)
+      .map((e) => e.getBoundingClientRect()).sort((a, b) => a.top - b.top);
+    return r.slice(1).map((x, i) => Math.round(x.top - r[i].bottom));
+  }, sels);
+  await page.goto("./");
+  expect(await gaps([".hero > .frame", ".hero > .sign", "#go", "#diary", "#start > .divider", "#profile", "footer.ground"])).toEqual(Array(6).fill(24));
+  await playQuiz(page, 0);
+  expect(await gaps(["#result > *", "#profile", "footer.ground"])).toEqual(Array(6).fill(24));
+});
