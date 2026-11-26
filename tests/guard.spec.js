@@ -145,7 +145,8 @@ function metaProblems(buf) {
 }
 
 test("사이트의 모든 사진에 위치·기기·촬영 날짜 정보가 없다", () => {
-  for (const f of fs.readdirSync(path.join(ROOT, "img"))) {
+  for (const f of fs.readdirSync(path.join(ROOT, "img"), { recursive: true })) {
+    if (fs.statSync(path.join(ROOT, "img", f)).isDirectory()) continue;
     expect(metaProblems(fs.readFileSync(path.join(ROOT, "img", f))), f).toEqual([]);
   }
 });

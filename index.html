@@ -158,12 +158,22 @@ p{margin:0}
   font-family:var(--pixel);font-size:10px;line-height:1;padding:7px 8px;color:#fff;background:var(--grass-dark);border:3px solid var(--ink)}
 .lang:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
 #sq{width:100%;height:auto;image-rendering:pixelated;background:var(--sky);border:3px solid var(--ink)}
-/* 오늘의 봉군이: 버튼처럼 보이지 않게 그림자 없는 종이 카드 (누르는 요소 아님) */
-.today{gap:10px;padding:12px 14px}
-.today .tr{display:flex;align-items:center;gap:12px}
-.today img{flex:none;width:76px;height:76px;object-fit:cover;object-position:center 30%;border:3px solid var(--ink);background:var(--sign-lo)}
-.today .th{font-family:var(--display);font-size:16px;color:var(--grass-dark)}
-.today .tl{font-weight:700;font-size:15px;line-height:1.45;text-wrap:balance}
+/* 봉군이 임보 일기: 카드 자체는 누르는 요소 아님. 누를 수 있는 건 모은 썸네일뿐 */
+.diary{gap:10px;padding:12px 14px}
+.diary .th{font-family:var(--display);font-size:16px;color:var(--grass-dark)}
+.diary .dnew{align-self:flex-start;font-size:12px;font-weight:700;color:#fff;background:var(--accent-lo);border:2px solid var(--ink);padding:2px 8px}
+.diary .dphoto{display:block;width:100%;height:auto;border:3px solid var(--ink);background:var(--sign-lo);box-sizing:border-box}
+.diary .dmeta{font-family:var(--display);font-size:15px;color:var(--muted)}
+.diary .dcap{font-weight:700;font-size:15px;line-height:1.5}
+.diary .dcount{font-size:13px;font-weight:700;color:var(--muted)}
+.dgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.dgrid>*{aspect-ratio:1/1;box-sizing:border-box;border:2px solid var(--ink);padding:0;margin:0;overflow:hidden}
+.dgrid button{appearance:none;cursor:pointer;background:var(--sign-lo)}
+.dgrid button img{display:block;width:100%;height:100%;object-fit:cover}
+.dgrid button[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:1px}
+.dgrid button:focus-visible{outline:4px solid var(--gold);outline-offset:1px}
+.dgrid span{display:grid;place-items:center;border-style:dashed;border-color:var(--sign-lo);color:var(--sign-lo);font-family:var(--pixel);font-size:11px}
+.diary .ddone{font-weight:700;font-size:14px;color:var(--grass-dark)}
 </style>
 
 <div class="wrap">
@@ -178,9 +188,15 @@ p{margin:0}
 
   <section id="start" class="cta">
     <button class="btn" id="go" type="button" data-en="▶ Check our walk match">▶ 산책 궁합 알아보기</button>
-    <div class="sign today" id="today">
-      <p class="th"><span data-en="Bonggoon of the day">오늘의 봉군이</span><span style="white-space:nowrap"> · <span id="tdDate"></span></span></p>
-      <div class="tr"><img id="tdImg" alt="" width="76" height="76" loading="lazy" decoding="async"><p class="tl" id="tdLine"></p></div>
+    <div class="sign diary" id="diary">
+      <p class="th"><span data-en="Bonggoon's foster diary">봉군이 임보 일기</span>&nbsp;· <span style="white-space:nowrap"><span data-en="Foster">임보</span> <span id="dDay"></span></span></p>
+      <p class="dnew" id="dNew" hidden data-en="A new entry just opened">새 일기가 열렸어요</p>
+      <img class="dphoto" id="dImg" alt="" loading="lazy" decoding="async">
+      <p class="dmeta" id="dMeta"></p>
+      <p class="dcap" id="dCap"></p>
+      <p class="dcount" id="dCount"></p>
+      <div class="dgrid" id="dGrid"></div>
+      <p class="ddone" id="dDone" hidden data-en="You've collected every entry. Certified Bonggoon superfan.">일기를 모두 모으셨어요. 봉군이 찐팬 인증이에요.</p>
     </div>
     <div class="divider" aria-hidden="true"></div>
   </section>
@@ -744,38 +760,80 @@ function preview(){
   $("preview").scrollIntoView({block:"start"});
 }
 
-// 오늘의 봉군이: 한국 시간 날짜마다 gal-*.jpg를 파일 이름 순서대로 하나씩 (다 돌면 처음부터). 같은 날엔 누구에게나 같은 사진.
-// 문구는 사진에 보이는 것만 써요. 사진 설명(alt)은 갤러리 것을 그대로 가져와요.
-const TODAY = [
-  ["01","벽에 기대 생각에 잠겼어요","Leaning on the wall, lost in thought."],
-  ["02","구석 방석에서 꾸벅꾸벅 졸아요","Nodding off on the corner cushion."],
-  ["03","오늘은 입이 귀에 걸렸어요","Smiling from ear to ear today."],
-  ["04","방석 위에 아주 얌전히 앉았어요","Sitting very politely on his cushion."],
-  ["06","산책 줄 매고 출발 준비 끝났어요","Leash on, ready to head out."],
-  ["07","가슴 쓰다듬는 손에 몸을 맡겼어요","Enjoying a gentle chest rub."],
-  ["08","차 안 방석에 턱을 괴고 쉬어요","Resting his chin on a car cushion."],
-  ["09","베개에 얼굴을 폭 묻었어요","Face buried deep in the pillow."],
-  ["11","방석에 기대 단잠에 빠졌어요","Snoozing against his cushion."],
-  ["14","트리 옆에서 볼을 잡혀도 의젓해요","By the tree, calm even with his cheeks held."],
-  ["15","흠뻑 젖어도 꿋꿋이 앉아 있어요","Soaking wet, but sitting tight."],
-  ["16","밤 산책도 씩씩하게 나왔어요","Out bravely for a night walk."],
-  ["17","간식 앞에서는 눈빛이 달라져요","A treat appears, and his eyes change."],
-  ["18","오늘은 정수리 가마를 공개해요","Today's reveal: his crown whorl."],
-  ["21","니트 입고 가만히 올려다봐요","Looking up in his cozy knit."],
-  ["22","니트에 하네스까지, 외출 준비 완료","Knit and harness on, all set to go."],
-  ["23","파란 하늘 아래 산책 중이에요","Walking under a big blue sky."],
-  ["24","보호소 시절에도 의젓하게 앉았어요","Sitting tall, back in his shelter days."],
-  ["25","밤 산책길에 성큼성큼 다가와요","Striding toward you on a night walk."],
-  ["26","고개 숙이고 눈만 올려다봐요","Head down, eyes peeking up."],
-  ["27","차 안에서 창밖 구경 중이에요","Watching the world from the car."],
-  ["28","차 안 방석에서 곤히 자요","Sound asleep on his car cushion."],
-  ["29","잔디밭을 신나게 달려요","Running happily across the grass."],
+// 봉군이 임보 일기: 인스타 @im.bonggoon 게시물(사진 1장 + 캡션 그대로, 해시태그·@멘션만 뺌). 날짜 오름차순.
+// [파일, 원래 게시 날짜(MM-DD, 2026년), 한국어 캡션("" = 캡션 없음), 영어, 가로, 세로]
+const DIARY = [
+  ["d01","10-04","봉군이 임시보호 시작 🐕","Day one of fostering Bonggoon 🐕",800,800],
+  ["d02","10-06","뭔가불편해 · 아 이건가 · 이거다 · 침대의 맛을 알아버린 할아버지 · 아깜짝이야 · 놀랜 봉군할아버지","Something's off · Oh, is it this? · That's it · A grandpa who's discovered the joy of beds · Oh, you startled me · Startled Grandpa Bonggoon",800,800],
+  ["d03","10-09","식당에서도 얌전한 봉군띠...","So well-behaved, even at a restaurant...",600,800],
+  ["d04","10-11","","",600,800],
+  ["d05","10-12","오늘 3산책?그렇게 빨리 걷다간 봉군아","Three walks today? Walk that fast and, Bonggoon...",800,800],
+  ["d06","10-13","무섭다리 엘레베이터 · 그치만 산책조아 · 열심히 산책 · 한 증거 · 헤헤","Scary elevator · But I love walks · Proof I walked · really hard · Hehe",800,800],
+  ["d07","10-13","","",800,800],
+  ["d09","10-15","발닦기싷허","No paw wiping, pleeease",600,800],
+  ["d10","10-15","관찰당하는중","Being watched",600,800],
+  ["d11","10-18","미안해 널 데리고 들어갈순없었어 봉구나 · 근데 너무 하찮아서 구ㅏ엽다...","Sorry, Bonggoon, I couldn't take you inside · But you look so tiny it's ridiculously cute...",800,800],
+  ["d12","10-18","여유있게 커피 앤 산책 · 하려고했지만","A relaxed coffee-and-walk · or so I planned",800,800],
+  ["d13","10-18","닦을테면닦아","Wipe them if you can",600,800],
+  ["d14","10-19","피할곳이없다 · 재발가줘 · 아가처럼 쟘자기","Nowhere to hide · Please just go · Sleeping like a baby",600,800],
+  ["d15","10-19","오늘은 내가 벤치에 앉으니까 풀밭에 앉아서 늠름하게 기다려줌","Today when I sat on a bench, he sat on the grass and waited like a gentleman",600,800],
+  ["d16","10-21","너눈을왜그렇게떠","Why are you making those eyes?",600,800],
+  ["d17","10-22","끙카","Oof",600,800],
+  ["d18","10-23","털색이 너무 예쁘시네요","What a lovely coat you have",600,800],
+  ["d19","10-23","오늘은 봉군이가 암바 냄새도 맡았다.","Today Bonggoon even got a sniff of Amba.",600,800],
+  ["d20","10-24","많이 피곤한가봐...","He must be really tired...",800,800],
+  ["d21","10-24","","",800,800],
+  ["d22","10-25","귤선생 임봉군","Professor Tangerine, Lim Bonggoon",800,800],
+  ["d23","10-27","봉군아 많이 예뻐졌다","Bonggoon, you've gotten so much prettier",800,640],
+  ["d24","10-28","","",600,800],
+  ["d25","10-28","역시 한강은 치트키였다","The Han River really is a cheat code",600,800],
+  ["d27","11-01","뽕구니랑 나랑2","Bonggoon and me 2",800,800],
+  ["d28","11-03","내자리야...","That's my spot...",744,800],
+  ["d30","11-13","봉군이 몸져눕다","Bonggoon, laid up in bed",800,800],
+  ["d31","11-14","오늘 디다뎌","Today, finally",800,800],
+  ["d32","11-16","쉬한뒤엔 기부니가좋그든요","A pee always puts me in a good mood, ya know",718,800],
+  ["d33","11-16","가을을 만끽해 봉군아","Enjoy the autumn, Bonggoon",800,800],
+  ["d34","11-17","Magic eye series","Magic eye series",600,800],
+  ["d35","11-19","외사랑","Unrequited love",600,800],
+  ["d36","11-20","봉군: 제발 립미얼론","Bonggoon: Please, leave me alone",600,800],
+  ["d37","11-21","세상엔 너를 예뻐하는 사람이 아주 많아 봉군아 근데 좀 피곤하지 인기인은 피곤한 법이야","So many people in the world adore you, Bonggoon. A bit tiring though, right? Being popular is tiring.",800,800],
+  ["d38","11-26","운동많이된다","Great workout",800,800],
 ];
-{ const now = Date.now(), day = Math.floor((now + 9 * 36e5) / 864e5); // KST 자정에 바뀜
-  const [n, ko, en] = TODAY[day % TODAY.length], src = `img/gal-${n}.jpg`;
-  $("tdImg").src = src; $("tdImg").alt = document.querySelector(`#track img[src="${src}"]`)?.alt || "";
-  $("tdDate").textContent = new Date(now).toLocaleDateString(EN ? "en-US" : "ko-KR", { month: EN ? "short" : "long", day: "numeric", timeZone: "Asia/Seoul" });
-  $("tdLine").textContent = L(ko, en); }
+// 공개 규칙(사람마다): 처음 온 날 Day 1, 그 뒤 한국 날짜가 다른 날 다시 올 때마다 1편씩. 같은 날 여러 번 와도 1편.
+{ const kst = (t) => new Date(t + 9 * 36e5).toISOString().slice(0, 10); // "2026-11-26" (한국 날짜)
+  const today = kst(Date.now());
+  // 임보 D+N: 2026-10-04(임보 시작일)이 D+1
+  $("dDay").textContent = "D+" + (Math.round((Date.parse(today) - Date.parse("2026-10-04")) / 864e5) + 1);
+  let n = 1, fresh = true;
+  try {
+    const st = JSON.parse(localStorage.getItem("diary") || "null");
+    if (st && st.n >= 1) { n = Math.min(Math.floor(st.n), DIARY.length); fresh = false;
+      if (st.last !== today && n < DIARY.length) { n++; fresh = true; } }
+    localStorage.setItem("diary", JSON.stringify({ n, last: today }));
+  } catch (e) { n = 1; fresh = false; } // 저장소가 막혀 있으면 Day 1만 (매번 '새 일기' 표시는 안 해요)
+  $("dNew").hidden = !fresh;
+  const date = (md) => EN ? new Date(`2026-${md}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
+                          : `${+md.slice(0, 2)}월 ${+md.slice(3)}일`;
+  const cells = [];
+  const open = (k) => {
+    const [f, md, ko, en, w, h] = DIARY[k], im = $("dImg");
+    im.src = `img/diary/${f}.jpg`; im.width = w; im.height = h; im.alt = L(`${date(md)}의 봉군이`, `Bonggoon on ${date(md)}`);
+    $("dMeta").textContent = `Day ${k + 1} · ${date(md)}`;
+    $("dCap").textContent = L(ko, en) || L(`${date(md)}의 봉군이`, `Bonggoon on ${date(md)}`);
+    cells.forEach((c, i) => c.setAttribute("aria-pressed", i === k));
+  };
+  DIARY.forEach(([f], k) => {
+    if (k >= n) { const s = document.createElement("span"); s.textContent = "?"; s.setAttribute("aria-hidden", "true"); $("dGrid").append(s); return; }
+    const b = document.createElement("button");
+    b.type = "button"; // 버튼 이름 = 썸네일 alt
+    b.innerHTML = `<img src="img/diary/${f}.jpg" loading="lazy" decoding="async">`;
+    b.firstChild.alt = L(`Day ${k + 1} 일기 보기`, `Show Day ${k + 1}`);
+    b.onclick = () => open(k);
+    cells.push(b); $("dGrid").append(b);
+  });
+  $("dCount").textContent = L(`모은 일기 ${n} / ${DIARY.length}`, `Entries collected ${n} / ${DIARY.length}`);
+  $("dDone").hidden = n < DIARY.length;
+  open(n - 1); }
 addEventListener("hashchange", preview); preview();
 // 다른 브라우저로 넘어왔을 때(#result-w-94) 같은 결과를 다시 보여줘요
 { const m = location.hash.match(/^#result-([wnsg])-(\d{2,3})$/) || location.search.match(/[?&]result=([wnsg])-(\d{2,3})/);
