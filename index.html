@@ -68,7 +68,8 @@ p{margin:0}
 .frame{border:4px solid var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.28);background:var(--sky);line-height:0}
 .frame img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center top;border:5px solid var(--sign)}
 @media (max-width:699px){.frame img{aspect-ratio:4/3;object-position:center 15%}}
-.hero h1{font-size:clamp(38px,11vw,52px)}
+/* 두 번째 줄("산책 궁합은 몇 %?" ≈ 6.7em)이 카드 안에 한 줄로 들어가게: 모바일 카드 글 폭 = 100vw - 100px(여백 56 + 카드 44) */
+.hero h1{font-size:clamp(28px,calc((100vw - 100px) / 7),52px)}
 .hero h1 em{font-style:normal;color:var(--accent);text-shadow:3px 3px 0 var(--ink)}
 
 /* quiz */
@@ -78,6 +79,8 @@ p{margin:0}
 .blocks i{flex:1;height:16px;background:var(--sign-lo);border:3px solid var(--ink)}
 .blocks i.on{background:var(--gold)}
 .q{font-size:28px}
+/* 줄바꿈될 때 마지막 단어 하나만 다음 줄로 떨어지지 않게 (h1~h3는 위에서 이미 balance) */
+.opt span,.btn,.meetline,.again{text-wrap:balance}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{appearance:none;font:inherit;font-weight:700;color:var(--ink);text-align:left;cursor:pointer;display:flex;gap:12px;align-items:center;
   padding:12px;background:var(--sign-hi);border:3px solid var(--ink);box-shadow:inset -4px -4px 0 var(--sign-lo)}
@@ -162,7 +165,7 @@ p{margin:0}
     <div class="frame"><img src="img/apple.jpg" alt="머리 위에 초록 열매를 얹고 얌전히 앉아 있는 봉군이" data-en-alt="Bonggoon sitting politely with a green fruit on his head"></div>
     <div class="sign">
       <span class="tag" style="font-family:var(--display);font-size:16px;letter-spacing:0" data-en="Bonggoon is looking for a family">봉군이의 가족을 찾고 있어요</span>
-      <h1 data-en="You &amp; &lt;em&gt;Bonggoon&lt;/em&gt;,&lt;br&gt;what's your walk match?">나와 <em>봉군이</em>,<br>산책 궁합은 몇 %?</h1>
+      <h1 data-en="You&amp;nbsp;&amp;amp;&amp;nbsp;&lt;em&gt;Bonggoon&lt;/em&gt;,&lt;br&gt;what's your walk&amp;nbsp;match?">나와 <em>봉군이</em>,<br>산책 궁합은 몇&nbsp;%?</h1>
       <p data-en="Six questions to find out how well you and Bonggoon would walk together.">질문 6개로 봉군이와 나의 궁합을 알아보세요.</p>
     </div>
   </section>
