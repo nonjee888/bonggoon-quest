@@ -362,25 +362,61 @@ test("?lang=en 이면 한국어 브라우저에서도 영어로 보인다", asyn
   await expect(page.locator("#langBtn")).toHaveText("KO");
 });
 
-test("오늘의 봉군이: 한국 시간 날짜마다 사진·문구가 바뀌고, 사진 수만큼 돌면 처음으로", async ({ page }) => {
-  const at = async (iso) => {
+test("봉군이 임보 일기: 처음 온 날 Day 1, 같은 날 다시 와도 그대로, 다른 날 오면 1편씩 열린다", async ({ page }) => {
+  const visit = async (iso) => {
     await page.clock.setFixedTime(new Date(iso));
     await page.goto("./");
-    const card = page.locator("#today");
-    await expect(card).toBeVisible();
-    return { src: await page.locator("#tdImg").getAttribute("src"), date: await page.locator("#tdDate").textContent(),
-             line: await page.locator("#tdLine").textContent(), alt: await page.locator("#tdImg").getAttribute("alt") };
+    await expect(page.locator("#diary")).toBeVisible();
   };
-  // 한국 자정 직후 (UTC로는 아직 전날) → 이미 27일 사진
-  const a = await at("2026-11-27T00:30:00+09:00");
-  expect(a).toMatchObject({ src: "img/gal-22.jpg", date: "11월 27일" });
-  expect(a.line.length).toBeGreaterThan(5);
-  expect(a.alt).not.toBe("");
-  const b = await at("2026-11-28T23:59:00+09:00");
-  expect(b).toMatchObject({ src: "img/gal-23.jpg", date: "11월 28일" });
-  expect(b.line).not.toBe(a.line);
-  // 사진 23장 → 23일 뒤엔 다시 같은 사진
-  expect((await at("2026-12-20T12:00:00+09:00")).src).toBe("img/gal-22.jpg");
-  // 같은 날의 사진 파일이 실제로 열리는지
-  expect((await page.request.get(a.src)).status()).toBe(200);
+  const grid = page.locator("#dGrid");
+  // 첫 방문: Day 1 + '새 일기' 표시, 썸네일 1칸만 열림
+  await visit("2026-11-26T10:00:00+09:00");
+  await expect(page.locator("#dDay")).toHaveText("D+54"); // 10월 4일이 D+1
+  await expect(page.locator("#dMeta")).toHaveText("Day 1 · 10월 4일");
+  await expect(page.locator("#dCap")).toHaveText("봉군이 임시보호 시작 🐕");
+  await expect(page.locator("#dNew")).toBeVisible();
+  await expect(page.locator("#dCount")).toHaveText("모은 일기 1 / 35");
+  await expect(grid.locator("button")).toHaveCount(1);
+  await expect(grid.locator("span")).toHaveCount(34);
+  expect((await page.request.get(await page.locator("#dImg").getAttribute("src"))).status()).toBe(200);
+  // 같은 날 다시 와도 그대로, '새 일기' 표시 없음
+  await visit("2026-11-26T23:59:00+09:00");
+  await expect(page.locator("#dMeta")).toHaveText("Day 1 · 10월 4일");
+  await expect(page.locator("#dNew")).toBeHidden();
+  // 한국 자정 직후(UTC로는 아직 26일) → 다음 날 → Day 2 공개
+  await visit("2026-11-27T00:30:00+09:00");
+  await expect(page.locator("#dMeta")).toHaveText("Day 2 · 10월 6일");
+  await expect(page.locator("#dNew")).toBeVisible();
+  await expect(page.locator("#dCount")).toHaveText("모은 일기 2 / 35");
+  await expect(grid.locator("button")).toHaveCount(2);
+  // 며칠 건너뛰고 와도 1편만
+  await visit("2026-12-05T12:00:00+09:00");
+  await expect(page.locator("#dMeta")).toHaveText("Day 3 · 10월 9일");
+  // 모은 썸네일을 누르면 그 일기가 카드에 보여요, 캡션 없는 게시물은 날짜만
+  await grid.getByRole("button", { name: "Day 1 일기 보기" }).click();
+  await expect(page.locator("#dMeta")).toHaveText("Day 1 · 10월 4일");
+  await expect(grid.getByRole("button", { name: "Day 1 일기 보기" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#dDone")).toBeHidden();
+});
+
+test("봉군이 임보 일기: 캡션 없는 날은 날짜만, 다 모으면 완료 문구, 영어 화면", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("diary", JSON.stringify({ n: 34, last: "2000-01-01" })));
+  await page.goto("./?lang=en");
+  await expect(page.locator("#dMeta")).toHaveText("Day 35 · Nov 26");
+  await expect(page.locator("#dCount")).toHaveText("Entries collected 35 / 35");
+  await expect(page.locator("#dDone")).toBeVisible();
+  await expect(page.locator("#dGrid span")).toHaveCount(0);
+  await page.getByRole("button", { name: "Show Day 4", exact: true }).click();
+  await expect(page.locator("#dCap")).toHaveText("Bonggoon on Oct 11");
+});
+
+test("봉군이 임보 일기: localStorage가 막혀도 에러 없이 Day 1", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.addInitScript(() => { Object.defineProperty(window, "localStorage", { get() { throw new Error("blocked"); } }); });
+  await page.goto("./");
+  await expect(page.locator("#dMeta")).toHaveText("Day 1 · 10월 4일");
+  await expect(page.locator("#dCount")).toHaveText("모은 일기 1 / 35");
+  await expect(page.locator("#go")).toBeVisible();
+  expect(errors).toEqual([]);
 });
