@@ -10,7 +10,17 @@ window.goatcounter = { referrer: "toss" };
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("kakao")?.closest(".sign")?.setAttribute("hidden", "");
   document.querySelectorAll('a[href*="instagram.com"]').forEach((a) => a.setAttribute("hidden", ""));
+  // 결과 카드엔 누를 수 없는 안내 글자만 남겨요 (링크·버튼 금지). 언어 전환은 새로고침이라 지금 언어로 한 번만 넣으면 돼요
+  const p = document.createElement("p");
+  p.className = "small";
+  p.textContent = document.documentElement.lang === "en"
+    ? "You can also see Bonggoon's everyday life on Instagram @im.bonggoon."
+    : "봉군이 일상은 인스타그램 @im.bonggoon 에서도 볼 수 있어요.";
+  document.querySelector('#result .sign a.btn.alt[href*="instagram.com"]')?.after(p);
 });
+
+// 웹뷰가 숫자·주소를 자동 링크로 바꾸지 않게 (위 안내 글자가 눌리지 않도록)
+document.head.insertAdjacentHTML("beforeend", '<meta name="format-detection" content="telephone=no,email=no,address=no">');
 
 // 새 창 링크(입양 신청서)는 미니앱 웹뷰 밖, 기기 브라우저로 열어요
 document.addEventListener("click", (e) => {
