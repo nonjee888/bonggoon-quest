@@ -13,9 +13,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // 결과 카드엔 누를 수 없는 안내 글자만 남겨요 (링크·버튼 금지). 언어 전환은 새로고침이라 지금 언어로 한 번만 넣으면 돼요
   const p = document.createElement("p");
   p.className = "small";
-  p.textContent = document.documentElement.lang === "en"
-    ? "You can also see Bonggoon's everyday life on Instagram @im.bonggoon."
-    : "봉군이 일상은 인스타그램 @im.bonggoon 에서도 볼 수 있어요.";
+  // '@im.bonggoon'은 중간에서 끊기지 않게 묶어 둬요 (토스 검수가 어색한 줄바꿈에 민감)
+  const [before, tag] = document.documentElement.lang === "en"
+    ? ["Bonggoon's Instagram ", "@im.bonggoon"]
+    : ["봉군이의 인스타그램 ", "@im.bonggoon"];
+  const nb = document.createElement("span");
+  nb.style.whiteSpace = "nowrap";
+  nb.textContent = tag;
+  p.append(before, nb);
   document.querySelector('#result .sign a.btn.alt[href*="instagram.com"]')?.after(p);
 });
 
