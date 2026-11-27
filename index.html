@@ -434,10 +434,15 @@ if (TRACK_ON && !window.goatcounter?.count) {
 function track(name){
   try { if (TRACK_ON && window.goatcounter?.count) window.goatcounter.count({ path: "event/" + name, title: name, event: true }); } catch(e) {}
 }
+// "사람 수" 이벤트: 기기당 처음 한 번만 보내요 (위 이벤트는 누를 때마다 셈). 저장소가 막혀 있으면 그냥 보내요.
+function trackOnce(name){
+  try { if (localStorage.getItem("gc1:" + name)) return; localStorage.setItem("gc1:" + name, "1"); } catch(e) {}
+  track(name);
+}
 document.addEventListener("click", (e) => {
   const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
-  if (a.href.includes("docs.google.com/forms")) track("4-입양신청서클릭");
-  else if (a.href.includes("instagram.com/im.bonggoon")) track("4-봉군이인스타방문");
+  if (a.href.includes("docs.google.com/forms")) { track("4-입양신청서클릭"); trackOnce("4-입양관심-사람"); }
+  else if (a.href.includes("instagram.com/im.bonggoon")) { track("4-봉군이인스타방문"); trackOnce("4-입양관심-사람"); }
 });
 let shareMsg = "";
 // 면허증 이미지: render the license onto a 1080x1920 story canvas, cached per result.
@@ -465,6 +470,7 @@ async function startLicense(m){
   copied = false;
   try { navigator.clipboard?.writeText(STORY_LINK).then(()=>{ copied = true; }, ()=>{}); } catch(e) {}
   mode = m; track(m === "save" ? "3-공유-이미지저장버튼" : "3-공유-인스타스토리버튼");
+  if (m !== "save") trackOnce("3-공유-사람");
   const toast = document.getElementById("saveToast"); toast.textContent = "";
   if(!window.html2canvas){ toast.textContent = L("지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요.", "Can't make the image right now. Please take a screenshot instead."); return; }
   loaderOpen();
@@ -662,7 +668,7 @@ function sendKakao(){
   loaderClose();
 }
 async function shareKakao(){
-  track("3-공유-카톡");
+  track("3-공유-카톡"); trackOnce("3-공유-사람");
   if (!KAKAO_JS_KEY || !window.Kakao) return copyFallback();
   try{ if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY); }catch(e){ return copyFallback(); }
   if (kakaoImg && kakaoFor === lastResult) return sendKakao();
@@ -800,6 +806,7 @@ function finish(){
   const top = [...picks].reverse().find(k=>score[k]===best);
   showResult(top, 82 + score[top]*3); // 85~100
   track("2-결과-" + TYPES[top].name.replace(/\s/g, "")); // 이벤트 이름은 언어와 상관없이 한국어 유형 이름
+  trackOnce("2-결과-사람");
 }
 function showResult(top, pct){
   const t = T(top), ko = TYPES[top];
