@@ -429,7 +429,7 @@ test("큰 블록 사이 세로 간격은 첫 화면·결과 화면 모두 24px�
     return r.slice(1).map((x, i) => Math.round(x.top - r[i].bottom));
   }, sels);
   await page.goto("./");
-  expect(await gaps([".hero > .frame", ".hero > .sign", "#go", "#diary", "#start > .divider", "#profile", "footer.ground"])).toEqual(Array(6).fill(24));
+  expect(await gaps([".hero > .frame", ".hero > .sign", "#go", "#bondGo", "#diary", "#start > .divider", "#profile", "footer.ground"])).toEqual(Array(7).fill(24));
   await playQuiz(page, 0);
   expect(await gaps(["#result > *", "#profile", "footer.ground"])).toEqual(Array(6).fill(24));
 });

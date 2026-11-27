@@ -12,7 +12,8 @@ module.exports = defineConfig({
     // 한국어가 기본인 테스트들이라 브라우저 언어를 한국어로 고정해요 (영어 모드 테스트는 따로 en-US로 바꿔요)
     locale: "ko-KR" },
   webServer: process.env.BASE_URL ? undefined : {
-    command: "python3 -m http.server 4173 --bind 127.0.0.1",
+    // 토스 빌드(dist/)도 같이 만들어 /dist/ 로 테스트해요
+    command: "node toss/build.mjs && python3 -m http.server 4173 --bind 127.0.0.1",
     url: "http://127.0.0.1:4173/",
     reuseExistingServer: !process.env.CI,
   },
