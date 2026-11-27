@@ -928,7 +928,7 @@ const BOND = {
   TREAT: 2,                             // 1단계에서는 안 먹어요 (0)
   TRAIN_OK: 3, TRAIN_NO: 1, TRAIN_P: { 3: .45, 4: .7, 5: .9 }, // 훈련은 3단계부터, 성공 확률
   ACC_P: .2, ACC_OK: 2, ACC_SCOLD: -2,  // 소변 실수: 1·2단계, 하루 한 번까지
-  CUSH_P: .15,                          // 방석 옮기기: 1·2단계, 하루 한 번까지, 재미 이벤트라 점수 변화 없음
+  CUSH_P: .15,                          // 방석 옮기기: 1·2단계, 하루 한 번까지. 재미 이벤트라 이벤트 자체 점수는 없고 그 행동 점수만
 };
 // 문구 [한국어, 영어]: 오너가 알려 준 봉군이 사실만 (꼬리는 흔들지 않아요)
 const BL = {
@@ -971,7 +971,7 @@ const BSCENE = [
 ];
 const STILL = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let B = null, bPending = false, bShown = 0, bTimers = [];
-const bAfter = (f, ms) => bTimers.push(setTimeout(f, ms));
+const bAfter = (f, ms) => { const id = setTimeout(() => { bTimers = bTimers.filter((x) => x !== id); f(); }, ms); bTimers.push(id); };
 const bClear = () => { bTimers.forEach(clearTimeout); bTimers = []; }; // clearTimeout은 setInterval도 멈춰요
 function bScene(s){
   bClear(); bShown = s;
@@ -1009,7 +1009,7 @@ function bReact(){
 function bLoad(){
   const today = kstDay();
   if (!B) try { B = JSON.parse(localStorage.getItem("bond") || "null"); } catch (e) {}
-  if (!B || typeof B.p !== "number" || !/^\d{4}-\d\d-\d\d$/.test(B.d0)) B = { d0: today, day: today, n: 0, p: 0, s: 1, last: "", acc: "" };
+  if (!B || !Number.isFinite(B.p) || !/^\d{4}-\d\d-\d\d$/.test(B.d0) || B.d0 > today) B = { d0: today, day: today, n: 0, p: 0, s: 1, last: "", acc: "" };
   B.s = Math.min(5, Math.max(1, B.s | 0)); B.n = Math.min(BOND.DAY, Math.max(0, B.n | 0));
   if (B.day !== today) { B.day = today; B.n = 0; B.last = ""; }
 }
@@ -1017,17 +1017,18 @@ function bSave(){ try { localStorage.setItem("bond", JSON.stringify(B)); } catch
 function bAct(k){
   bLoad();
   if (B.n >= BOND.DAY || bPending || (k === "train" && B.s < 3)) return bRender();
-  const s = B.s; let d, msg;
-  if (k === "pet") { const rush = s <= 2 && B.last === "pet"; d = rush ? BOND.RUSH : BOND.PET; msg = BX(rush ? BL.rush : BL.pet[s]); }
+  const s = B.s; let d, msg, rush = false;
+  if (k === "pet") { rush = s <= 2 && B.last === "pet"; d = rush ? BOND.RUSH : BOND.PET; msg = BX(rush ? BL.rush : BL.pet[s]); }
   else if (k === "treat") { d = s === 1 ? 0 : BOND.TREAT; msg = BX(BL.treat[s]); }
   else { const c = BX(BL.cmd[Math.floor(Math.random() * 3)]), ok = Math.random() < BOND.TRAIN_P[s];
     d = ok ? BOND.TRAIN_OK : BOND.TRAIN_NO;
     msg = ok ? L(`'${c}' 성공! 봉군이가 해냈어요.`, `'${c}' worked! Bonggoon did it.`)
              : L(`'${c}' 했더니 봉군이가 가만히 쳐다만 봐요. 다음에 또 해 봐요.`, `You said '${c}', and Bonggoon just stared at you. Try again next time.`); }
   B.n++; B.last = k;
-  let cush = false;
-  if (s <= 2 && k !== "train" && B.acc !== B.day && Math.random() < BOND.ACC_P) { B.acc = B.day; bPending = true; msg += " " + BX(BL.acc); }
-  else if (s <= 2 && k !== "train" && B.cush !== B.day && Math.random() < BOND.CUSH_P) { B.cush = B.day; cush = true; msg = BX(BL.cush); }
+  // 이벤트는 단계가 오르지 않는 1·2단계 행동에서만 (단계 오름 문구에 가려지지 않게)
+  let cush = false; const ev = s <= 2 && k !== "train" && B.p + d < BOND.T[s];
+  if (ev && B.acc !== B.day && Math.random() < BOND.ACC_P) { B.acc = B.day; bPending = true; msg += " " + BX(BL.acc); }
+  else if (ev && !rush && B.cush !== B.day && Math.random() < BOND.CUSH_P) { B.cush = B.day; cush = true; msg = BX(BL.cush); }
   bAdd(d, msg);
   if (cush && B.s === s) bScene(0); // 다음 행동 때 원래 장면으로 돌아와요
 }
@@ -1039,7 +1040,7 @@ function bAdd(d, msg){
   bSave(); bRender(msg); bReact();
 }
 function bRender(msg){
-  const left = BOND.DAY - B.n, days = Math.round((Date.parse(B.day) - Date.parse(B.d0)) / 864e5) + 1, max = BOND.T[4];
+  const left = BOND.DAY - B.n, days = Math.max(1, Math.round((Date.parse(B.day) - Date.parse(B.d0)) / 864e5) + 1), max = BOND.T[4];
   $("bDay").textContent = L(`친해진 지 ${days}일째`, `Day ${days} together`);
   $("bLeft").textContent = "●".repeat(left) + "○".repeat(B.n);
   $("bLeft").setAttribute("aria-label", L(`${left}번`, `${left}`));
@@ -1057,7 +1058,7 @@ function bRender(msg){
 }
 function bOpen(){
   track("친해지기-시작");
-  bLoad(); bSave(); bShown = 0;
+  bLoad(); bSave(); bShown = 0; bPending = false; // 고르지 않고 나갔던 실수 이벤트는 넘어가요
   $("start").hidden = true; $("bond").hidden = false;
   bRender(BX(BL.intro[B.s]));
   $("bond").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1067,6 +1068,8 @@ $("bBack").onclick = () => { bClear(); bShown = 0; $("bond").hidden = true; $("s
 $("bActs").onclick = (e) => { const b = e.target.closest("button"); if (b) bAct(b.dataset.act); };
 $("bChoice").onclick = (e) => { const b = e.target.closest("button"); if (b) bPick(b.dataset.pick); };
 $("bScene").onclick = bReact;
+// 화면을 켜 둔 채 한국 날짜가 바뀌어도, 다시 볼 때 오늘 횟수가 새로 채워져요
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("bond").hidden && !bPending) { bLoad(); bRender(); } });
 // 친구에게 자랑하기 (웹: 카카오톡 공유, 안 되면 문구 복사). 토스 미니앱은 toss/entry.js가 토스 공유로 바꿔요
 $("bShare").onclick = () => {
   track("친해지기-엔딩공유"); trackOnce("3-공유-사람");

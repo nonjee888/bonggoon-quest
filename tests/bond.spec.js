@@ -102,6 +102,7 @@ test("5단계 엔딩: 문구 + 자랑하기 + 봉군이 인스타 링크 (웹)",
 });
 
 test("토스 빌드(dist): 엔딩에 인스타 링크 없이 글자만", async ({ page }) => {
+  test.skip(!!process.env.BASE_URL, "배포된 사이트에는 dist/가 없어요");
   await open(page, { st: state(5, 80), url: "./dist/" });
   const end = page.locator("#bEnd");
   await expect(end).toBeVisible();
@@ -137,4 +138,40 @@ test("통계: 친해지기 시작·단계·엔딩공유 이벤트 (+ 공유 사�
   await page.getByRole("button", { name: "친구에게 자랑하기" }).click();
   const paths = (await page.evaluate(() => window.__events)).map((e) => e.path);
   expect(paths).toEqual(expect.arrayContaining(["event/친해지기-시작", "event/친해지기-단계5", "event/친해지기-엔딩공유", "event/3-공유-사람"]));
+});
+
+test("소변 실수에서 괜찮아를 고르면 유대감이 올라요", async ({ page }) => {
+  await open(page, { st: state(2, 15), rnd: 0 });
+  await act(page, "간식 주기");
+  await page.getByRole("button", { name: "괜찮아" }).click();
+  await expect(page.locator("#bSay")).toContainText("조용히 치웠어요");
+  await expect(page.locator("#bBar")).toHaveAttribute("aria-label", "유대감 19 / 75"); // 간식 +2, 괜찮아 +2
+});
+
+test("단계가 오르는 행동에는 실수 이벤트가 끼어들지 않아요", async ({ page }) => {
+  await open(page, { st: state(1, 9), rnd: 0 });
+  await act(page, "쓰다듬기");
+  await expect(page.locator("#bSay")).toContainText("2단계가 됐어요!");
+  await expect(page.locator("#bChoice")).toBeHidden();
+  await expect(page.locator("#bActs button:enabled")).toHaveCount(2);
+});
+
+test("방석 옮기기: 구석에 웅크린 장면, 다음 행동 때 원래 장면으로", async ({ page }) => {
+  await open(page);
+  // 첫 확률(실수)은 피하고, 둘째(방석)는 걸리게
+  await page.evaluate(() => { let k = 0; Math.random = () => (k++ % 2 ? 0 : 0.99); });
+  await act(page, "쓰다듬기");
+  await expect(page.locator("#bSay")).toContainText("구석이 최고래요");
+  await expect(page.locator('#bScene img[src$="dog-curl.png"]')).toHaveCount(1);
+  await expect(page.locator("#bBar")).toHaveAttribute("aria-label", "유대감 2 / 75");
+  await page.evaluate(() => { Math.random = () => 0.99; });
+  await act(page, "간식 주기");
+  await expect(page.locator('#bScene img[src$="dog1.png"]')).toHaveCount(1);
+});
+
+test("훈련 성공은 +3", async ({ page }) => {
+  await open(page, { st: state(3, 30), rnd: 0 });
+  await act(page, "훈련");
+  await expect(page.locator("#bSay")).toContainText("'손' 성공!");
+  await expect(page.locator("#bBar")).toHaveAttribute("aria-label", "유대감 33 / 75");
 });
