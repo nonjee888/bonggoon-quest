@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   b.type = "button"; b.className = "btn"; b.id = "tossShare";
   b.textContent = en ? "What's your friend's type? Send the match test" : "친구는 무슨 유형일까? 궁합 보내기";
   b.onclick = async () => {
-    window.track?.("3-공유-토스");
+    window.track?.("3-공유-토스"); window.trackOnce?.("3-공유-사람");
     const type = document.getElementById("rType").textContent;
     try {
       const link = await getTossShareLink("intoss://bonggoon-quest");
