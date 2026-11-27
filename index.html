@@ -761,21 +761,22 @@ function preview(){
 }
 
 // 봉군이 임보 일기: 인스타 @im.bonggoon 게시물(사진 1장 + 캡션 그대로, 해시태그·@멘션만 뺌). 날짜 오름차순.
+// 여러 장 게시물은 첫 사진의 캡션만(인스타 사진별 캡션). 375px 카드에서 3줄 이상 되는 긴 캡션은 빼고 날짜만.
 // [파일, 원래 게시 날짜(MM-DD, 2026년), 한국어 캡션("" = 캡션 없음), 영어, 가로, 세로]
 const DIARY = [
   ["d01","10-04","봉군이 임시보호 시작 🐕","Day one of fostering Bonggoon 🐕",800,800],
-  ["d02","10-06","뭔가불편해 · 아 이건가 · 이거다 · 침대의 맛을 알아버린 할아버지 · 아깜짝이야 · 놀랜 봉군할아버지","Something's off · Oh, is it this? · That's it · A grandpa who's discovered the joy of beds · Oh, you startled me · Startled Grandpa Bonggoon",800,800],
+  ["d02","10-06","뭔가불편해","Something's off",800,800],
   ["d03","10-09","식당에서도 얌전한 봉군띠...","So well-behaved, even at a restaurant...",600,800],
   ["d04","10-11","","",600,800],
   ["d05","10-12","오늘 3산책?그렇게 빨리 걷다간 봉군아","Three walks today? Walk that fast and, Bonggoon...",800,800],
-  ["d06","10-13","무섭다리 엘레베이터 · 그치만 산책조아 · 열심히 산책 · 한 증거 · 헤헤","Scary elevator · But I love walks · Proof I walked · really hard · Hehe",800,800],
+  ["d06","10-13","무섭다리 엘레베이터","Scary elevator",800,800],
   ["d07","10-13","","",800,800],
   ["d09","10-15","발닦기싷허","No paw wiping, pleeease",600,800],
   ["d10","10-15","관찰당하는중","Being watched",600,800],
   ["d11","10-18","미안해 널 데리고 들어갈순없었어 봉구나 · 근데 너무 하찮아서 구ㅏ엽다...","Sorry, Bonggoon, I couldn't take you inside · But you look so tiny it's ridiculously cute...",800,800],
   ["d12","10-18","여유있게 커피 앤 산책 · 하려고했지만","A relaxed coffee-and-walk · or so I planned",800,800],
   ["d13","10-18","닦을테면닦아","Wipe them if you can",600,800],
-  ["d14","10-19","피할곳이없다 · 재발가줘 · 아가처럼 쟘자기","Nowhere to hide · Please just go · Sleeping like a baby",600,800],
+  ["d14","10-19","피할곳이없다","Nowhere to hide",600,800],
   ["d15","10-19","오늘은 내가 벤치에 앉으니까 풀밭에 앉아서 늠름하게 기다려줌","Today when I sat on a bench, he sat on the grass and waited like a gentleman",600,800],
   ["d16","10-21","너눈을왜그렇게떠","Why are you making those eyes?",600,800],
   ["d17","10-22","끙카","Oof",600,800],
@@ -795,7 +796,7 @@ const DIARY = [
   ["d34","11-17","Magic eye series","Magic eye series",600,800],
   ["d35","11-19","외사랑","Unrequited love",600,800],
   ["d36","11-20","봉군: 제발 립미얼론","Bonggoon: Please, leave me alone",600,800],
-  ["d37","11-21","세상엔 너를 예뻐하는 사람이 아주 많아 봉군아 근데 좀 피곤하지 인기인은 피곤한 법이야","So many people in the world adore you, Bonggoon. A bit tiring though, right? Being popular is tiring.",800,800],
+  ["d37","11-21","","",800,800],
   ["d38","11-26","운동많이된다","Great workout",800,800],
 ];
 // 공개 규칙(사람마다): 처음 온 날 Day 1, 그 뒤 한국 날짜가 다른 날 다시 올 때마다 1편씩. 같은 날 여러 번 와도 1편.
