@@ -174,6 +174,46 @@ p{margin:0}
 .dgrid button:focus-visible{outline:4px solid var(--gold);outline-offset:1px}
 .dgrid span{display:grid;place-items:center;border-style:dashed;border-color:var(--sign-lo);color:var(--sign-lo);font-family:var(--pixel);font-size:11px}
 .diary .ddone{font-weight:700;font-size:14px;color:var(--grass-dark)}
+/* 봉군이랑 친해지기 */
+.new{font-family:var(--pixel);font-size:10px;vertical-align:middle;color:#fff;background:var(--accent-lo);border:2px solid var(--ink);padding:3px 5px;margin-left:6px}
+.bhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;font-size:14px}
+.bhead .dots{font-size:16px;letter-spacing:2px;color:var(--accent-lo)}
+.bbar i{background:linear-gradient(90deg,var(--gold) calc(var(--f,0) * 100%),var(--sign-lo) 0)}
+.bstage{font-size:24px}
+.say{font-weight:700;background:var(--sign-hi);border:3px solid var(--ink);padding:10px 12px;min-height:3.2em}
+.rest{font-weight:700;color:var(--accent-lo)}
+.bacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bacts .opt{flex-direction:column;justify-content:center;gap:4px;text-align:center;font-size:14px;padding:10px 4px;line-height:1.3}
+.bacts .opt:disabled,.bchoice .opt:disabled{cursor:default;opacity:.5}
+.bchoice{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bchoice .opt{justify-content:center}
+.bend{font-family:var(--display);font-size:21px;line-height:1.5}
+.scene{position:relative;width:100%;aspect-ratio:1;overflow:hidden;border:4px solid var(--ink);box-sizing:border-box;background-size:cover;background-position:center;image-rendering:pixelated;cursor:pointer}
+.scene img{position:absolute;image-rendering:pixelated;max-width:none}
+.scene .shake{animation:shake .16s steps(2) infinite}@keyframes shake{0%{transform:translateX(-1px)}100%{transform:translateX(1px)}}
+.scene .breath{animation:br 2.4s steps(4) infinite;transform-origin:50% 100%}@keyframes br{50%{transform:scaleY(1.025)}}
+.scene .dog.r-flinch{animation:fl .45s steps(3)}@keyframes fl{30%{transform:translate(8px,3px) scaleY(.94)}}
+.scene .dog.r-freeze{animation:fr .6s steps(2)}@keyframes fr{30%,70%{transform:scale(.96,1.03)}}
+.scene .bub{position:absolute;left:8%;top:10%;background:#fff;border:3px solid var(--ink);padding:2px 7px;font:900 15px var(--display);color:var(--ink);opacity:0}
+.scene .bub.on{opacity:1}
+.scene .z{position:absolute;top:22%;left:62%;font:900 18px monospace;color:var(--ink);font-style:normal;animation:zz 2.4s steps(6) infinite}.scene .z2{animation-delay:1.2s;font-size:13px}
+@keyframes zz{0%{transform:translate(0,0);opacity:0}30%{opacity:1}100%{transform:translate(12px,-22px);opacity:0}}
+.scene .dog5{left:60%;bottom:36%;height:34%}
+.scene .dog5.stand{visibility:hidden}
+.s5.up .dog5.sit{visibility:hidden}.s5.up .dog5.stand{visibility:visible}
+.s5.go .dog5{animation:shake .16s steps(2) infinite}
+.scene .harness{left:-2%;top:6%;height:52%;transform:translateX(-110%);transition:transform .35s steps(4)}
+.s5.go .harness{transform:translateX(0)}
+.s3 .bub,.s4 .bub,.s5 .bub{left:auto;right:6%;top:8%}
+/* 3단계: 다른 단계와 크기가 비슷해 보이게 30% → 36% */
+.scene .d3{bottom:34%;height:36%}
+.scene .d3.away{left:62%}.scene .d3.peek{left:38%;visibility:hidden}
+.s3.out .d3.away{visibility:hidden}.s3.out .d3.peek{visibility:visible}
+.scene .plant{left:47%;bottom:14%;height:66%}
+.scene .d3h{bottom:34%;height:36%;left:38%;clip-path:inset(0 38% 42% 0);visibility:hidden}.s3.out .d3h{visibility:visible}
+.scene .d4{left:22%;bottom:31%;height:27%;animation:br 3.2s steps(4) infinite;transform-origin:50% 100%}
+.scene .d4.yawn{visibility:hidden}.s4.y .d4.sleep{visibility:hidden}.s4.y .d4.yawn{visibility:visible}.s4.y .z{display:none}
+@media (prefers-reduced-motion:reduce){.scene *{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
@@ -188,6 +228,7 @@ p{margin:0}
 
   <section id="start" class="cta" style="gap:var(--gap)">
     <button class="btn" id="go" type="button" data-en="▶ Check our walk match">▶ 산책 궁합 알아보기</button>
+    <button class="btn alt" id="bondGo" type="button"><span data-en="🐾 Get close to Bonggoon">🐾 봉군이랑 친해지기</span><span class="new">NEW</span></button>
     <div class="sign diary" id="diary">
       <p class="th"><span data-en="Bonggoon's foster diary">봉군이 임보 일기</span>&nbsp;· <span style="white-space:nowrap"><span data-en="Foster">임보</span> <span id="dDay"></span></span></p>
       <p class="dnew" id="dNew" hidden data-en="A new entry just opened">새 일기가 열렸어요</p>
@@ -245,6 +286,34 @@ p{margin:0}
   </section>
 
   <section class="res" id="preview" hidden></section>
+
+  <section class="res" id="bond" hidden>
+    <div class="sign">
+      <div class="bhead"><span id="bDay"></span><span><span data-en="Left today">오늘 남은 횟수</span> <span class="dots" id="bLeft"></span></span></div>
+      <div class="blocks bbar" id="bBar" role="img"><i></i><i></i><i></i><i></i><i></i></div>
+      <h2 class="bstage" id="bStage"></h2>
+      <div class="scene" id="bScene" role="img"></div>
+      <p class="say" id="bSay" aria-live="polite"></p>
+      <p class="rest" id="bRest" hidden data-en="Bonggoon wants some rest. See you tomorrow">봉군이가 쉬고 싶어 해요. 내일 또 만나요</p>
+      <div class="bacts" id="bActs">
+        <button class="opt" type="button" data-act="pet"><span aria-hidden="true">🤚</span><span data-en="Pet">쓰다듬기</span></button>
+        <button class="opt" type="button" data-act="treat"><span aria-hidden="true">🦴</span><span data-en="Treat">간식 주기</span></button>
+        <button class="opt" type="button" data-act="train"><span aria-hidden="true">🎓</span><span id="bTrain"></span></button>
+      </div>
+      <div class="bchoice" id="bChoice" hidden>
+        <button class="opt" type="button" data-pick="ok" data-en="It's okay">괜찮아</button>
+        <button class="opt" type="button" data-pick="scold" data-en="Scold him">혼내기</button>
+      </div>
+    </div>
+    <div class="sign" id="bEnd" hidden>
+      <span class="tag">ENDING</span>
+      <p class="bend" data-en="Bonggoon still doesn't wag his tail.&lt;br&gt;But when you pick up the harness,&lt;br&gt;he trembles with fear, yet his bottom bounces up and down.&lt;br&gt;He's waiting for a family who'll let him open up slowly.">봉군이는 아직 꼬리를 흔들지 않아요.<br>그래도 하네스를 들면,<br>무서워 떨면서도 엉덩이를 들썩여요.<br>천천히 마음을 열어 줄 가족을 기다려요.</p>
+      <button class="btn" id="bShare" type="button" data-en="Show off to a friend">친구에게 자랑하기</button>
+      <span class="toast" id="bToast" role="status"></span>
+      <a class="btn alt" id="bInsta" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener" data-en="Bonggoon on Instagram @im.bonggoon">봉군이 인스타 @im.bonggoon</a>
+    </div>
+    <button class="again" id="bBack" type="button" data-en="← Back to start">← 처음 화면으로</button>
+  </section>
 
   <section class="sign" id="profile">
     <span class="tag">PROFILE</span>
