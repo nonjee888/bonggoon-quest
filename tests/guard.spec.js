@@ -252,6 +252,25 @@ test("통계를 켜면 시작·결과·공유·신청서 클릭이 이벤트로 
   for (const e of ev) expect(Object.keys(e).sort()).toEqual(["event", "path", "title"]);
 });
 
+test("'사람 수' 이벤트는 두 번 공유해도 기기당 한 번만 나간다", async ({ page }) => {
+  await page.route(/\/(index\.html)?(\?.*)?$/, async (route) => {
+    const res = await route.fetch(); let body = await res.text();
+    body = body.replace(/const GC_CODE = "[a-z0-9-]*";/, 'const GC_CODE = "test";');
+    await route.fulfill({ response: res, body });
+  });
+  await page.route("**/gc.zgo.at/**", (r) => r.abort());
+  await page.addInitScript(() => { window.__trackTest = true; window.__events = [];
+    window.goatcounter = { count: (o) => window.__events.push(o) }; });
+  await page.goto("./");
+  await play(page, [1, 1, 1, 1, 1, 1]);
+  // 첫 공유는 로딩 창이 덮으니 두 번 모두 버튼 클릭 이벤트로 바로 눌러요
+  await page.locator("#kakao").evaluate((b) => { b.click(); b.click(); });
+  const paths = (await page.evaluate(() => window.__events)).map((e) => e.path);
+  expect(paths.filter((p) => p === "event/3-공유-카톡")).toHaveLength(2);
+  expect(paths.filter((p) => p === "event/3-공유-사람")).toHaveLength(1);
+  expect(paths.filter((p) => p === "event/2-결과-사람")).toHaveLength(1);
+});
+
 test("휴대폰 첫 화면에서 시작 버튼이 스크롤 없이 보인다", async ({ page }) => {
   test.skip(test.info().project.name !== "android", "휴대폰 화면 전용");
   await page.goto("./");

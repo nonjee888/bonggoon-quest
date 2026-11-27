@@ -10,7 +10,11 @@ window.goatcounter = { referrer: "toss" };
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("kakao")?.closest(".sign")?.setAttribute("hidden", "");
   document.querySelectorAll('a[href*="instagram.com"]').forEach((a) => a.setAttribute("hidden", ""));
-  // 결과 카드엔 누를 수 없는 안내 글자만 남겨요 (링크·버튼 금지). 언어 전환은 새로고침이라 지금 언어로 한 번만 넣으면 돼요
+  // 결과 카드·친해지기 엔딩엔 누를 수 없는 안내 글자만 남겨요 (링크·버튼 금지). 언어 전환은 새로고침이라 지금 언어로 한 번만 넣으면 돼요
+  document.querySelector('#result .sign a.btn.alt[href*="instagram.com"]')?.after(instaText());
+  document.getElementById("bInsta")?.replaceWith(instaText()); // 엔딩 링크는 아예 빼요
+});
+function instaText(){
   const p = document.createElement("p");
   p.className = "small";
   // '@im.bonggoon'은 중간에서 끊기지 않게 묶어 둬요 (토스 검수가 어색한 줄바꿈에 민감)
@@ -21,8 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
   nb.style.whiteSpace = "nowrap";
   nb.textContent = tag;
   p.append(before, nb);
-  document.querySelector('#result .sign a.btn.alt[href*="instagram.com"]')?.after(p);
-});
+  return p;
+}
 
 // 웹뷰가 숫자·주소를 자동 링크로 바꾸지 않게 (위 안내 글자가 눌리지 않도록)
 document.head.insertAdjacentHTML("beforeend", '<meta name="format-detection" content="telephone=no,email=no,address=no">');
@@ -58,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
   b.type = "button"; b.className = "btn"; b.id = "tossShare";
   b.textContent = en ? "What's your friend's type? Send the match test" : "친구는 무슨 유형일까? 궁합 보내기";
   b.onclick = async () => {
-    window.track?.("3-공유-토스");
+    window.track?.("3-공유-토스"); window.trackOnce?.("3-공유-사람");
     const type = document.getElementById("rType").textContent;
     try {
       const link = await getTossShareLink("intoss://bonggoon-quest");
@@ -68,4 +72,21 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {} // 공유 창을 닫거나 실패해도 조용히
   };
   document.querySelector("#result .license")?.after(b);
+});
+
+// 봉군이랑 친해지기 엔딩의 '친구에게 자랑하기': 웹(카카오톡) 대신 토스 공유 링크로. 토스 밖(로컬 브라우저)에선 숨겨요.
+document.addEventListener("DOMContentLoaded", () => {
+  const b = document.getElementById("bShare");
+  if (!b) return;
+  if (!window.ReactNativeWebView) { b.hidden = true; return; }
+  const en = document.documentElement.lang === "en";
+  b.onclick = async () => {
+    window.track?.("친해지기-엔딩공유"); window.trackOnce?.("3-공유-사람");
+    try {
+      const link = await getTossShareLink("intoss://bonggoon-quest");
+      await share({ message: (en
+        ? "I got close to Bonggoon, an 8-year-old dog waiting for a family. Give it a try too!"
+        : "가족을 기다리는 8살 봉군이와 친해졌어요. 봉군이랑 친해지기, 같이 해 봐요!") + "\n" + link });
+    } catch (e) {}
+  };
 });

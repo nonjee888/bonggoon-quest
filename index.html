@@ -174,6 +174,46 @@ p{margin:0}
 .dgrid button:focus-visible{outline:4px solid var(--gold);outline-offset:1px}
 .dgrid span{display:grid;place-items:center;border-style:dashed;border-color:var(--sign-lo);color:var(--sign-lo);font-family:var(--pixel);font-size:11px}
 .diary .ddone{font-weight:700;font-size:14px;color:var(--grass-dark)}
+/* 봉군이랑 친해지기 */
+.new{font-family:var(--pixel);font-size:10px;vertical-align:middle;color:#fff;background:var(--accent-lo);border:2px solid var(--ink);padding:3px 5px;margin-left:6px}
+.bhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;font-size:14px}
+.bhead .dots{font-size:16px;letter-spacing:2px;color:var(--accent-lo)}
+.bbar i{background:linear-gradient(90deg,var(--gold) calc(var(--f,0) * 100%),var(--sign-lo) 0)}
+.bstage{font-size:24px}
+.say{font-weight:700;background:var(--sign-hi);border:3px solid var(--ink);padding:10px 12px;min-height:3.2em}
+.rest{font-weight:700;color:var(--accent-lo)}
+.bacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bacts .opt{flex-direction:column;justify-content:center;gap:4px;text-align:center;font-size:14px;padding:10px 4px;line-height:1.3}
+.bacts .opt:disabled,.bchoice .opt:disabled{cursor:default;opacity:.5}
+.bchoice{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bchoice .opt{justify-content:center}
+.bend{font-family:var(--display);font-size:21px;line-height:1.5}
+.scene{position:relative;width:100%;aspect-ratio:1;overflow:hidden;border:4px solid var(--ink);box-sizing:border-box;background-size:cover;background-position:center;image-rendering:pixelated;cursor:pointer}
+.scene img{position:absolute;image-rendering:pixelated;max-width:none}
+.scene .shake{animation:shake .16s steps(2) infinite}@keyframes shake{0%{transform:translateX(-1px)}100%{transform:translateX(1px)}}
+.scene .breath{animation:br 2.4s steps(4) infinite;transform-origin:50% 100%}@keyframes br{50%{transform:scaleY(1.025)}}
+.scene .dog.r-flinch{animation:fl .45s steps(3)}@keyframes fl{30%{transform:translate(8px,3px) scaleY(.94)}}
+.scene .dog.r-freeze{animation:fr .6s steps(2)}@keyframes fr{30%,70%{transform:scale(.96,1.03)}}
+.scene .bub{position:absolute;left:8%;top:10%;background:#fff;border:3px solid var(--ink);padding:2px 7px;font:900 15px var(--display);color:var(--ink);opacity:0}
+.scene .bub.on{opacity:1}
+.scene .z{position:absolute;top:22%;left:62%;font:900 18px monospace;color:var(--ink);font-style:normal;animation:zz 2.4s steps(6) infinite}.scene .z2{animation-delay:1.2s;font-size:13px}
+@keyframes zz{0%{transform:translate(0,0);opacity:0}30%{opacity:1}100%{transform:translate(12px,-22px);opacity:0}}
+.scene .dog5{left:60%;bottom:36%;height:34%}
+.scene .dog5.stand{visibility:hidden}
+.s5.up .dog5.sit{visibility:hidden}.s5.up .dog5.stand{visibility:visible}
+.s5.go .dog5{animation:shake .16s steps(2) infinite}
+.scene .harness{left:-2%;top:6%;height:52%;transform:translateX(-110%);transition:transform .35s steps(4)}
+.s5.go .harness{transform:translateX(0)}
+.s3 .bub,.s4 .bub,.s5 .bub{left:auto;right:6%;top:8%}
+/* 3단계: 다른 단계와 크기가 비슷해 보이게 30% → 36% */
+.scene .d3{bottom:34%;height:36%}
+.scene .d3.away{left:62%}.scene .d3.peek{left:38%;visibility:hidden}
+.s3.out .d3.away{visibility:hidden}.s3.out .d3.peek{visibility:visible}
+.scene .plant{left:47%;bottom:14%;height:66%}
+.scene .d3h{bottom:34%;height:36%;left:38%;clip-path:inset(0 38% 42% 0);visibility:hidden}.s3.out .d3h{visibility:visible}
+.scene .d4{left:22%;bottom:31%;height:27%;animation:br 3.2s steps(4) infinite;transform-origin:50% 100%}
+.scene .d4.yawn{visibility:hidden}.s4.y .d4.sleep{visibility:hidden}.s4.y .d4.yawn{visibility:visible}.s4.y .z{display:none}
+@media (prefers-reduced-motion:reduce){.scene *{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
@@ -188,6 +228,7 @@ p{margin:0}
 
   <section id="start" class="cta" style="gap:var(--gap)">
     <button class="btn" id="go" type="button" data-en="▶ Check our walk match">▶ 산책 궁합 알아보기</button>
+    <button class="btn alt" id="bondGo" type="button"><span data-en="🐾 Get close to Bonggoon">🐾 봉군이랑 친해지기</span><span class="new">NEW</span></button>
     <div class="sign diary" id="diary">
       <p class="th"><span data-en="Bonggoon's foster diary">봉군이 임보 일기</span>&nbsp;· <span style="white-space:nowrap"><span data-en="Foster">임보</span> <span id="dDay"></span></span></p>
       <p class="dnew" id="dNew" hidden data-en="A new entry just opened">새 일기가 열렸어요</p>
@@ -245,6 +286,34 @@ p{margin:0}
   </section>
 
   <section class="res" id="preview" hidden></section>
+
+  <section class="res" id="bond" hidden>
+    <div class="sign">
+      <div class="bhead"><span id="bDay"></span><span><span data-en="Left today">오늘 남은 횟수</span> <span class="dots" id="bLeft" role="img"></span></span></div>
+      <div class="blocks bbar" id="bBar" role="img"><i></i><i></i><i></i><i></i><i></i></div>
+      <h2 class="bstage" id="bStage"></h2>
+      <div class="scene" id="bScene" role="img"></div>
+      <p class="say" id="bSay" aria-live="polite"></p>
+      <p class="rest" id="bRest" hidden data-en="Bonggoon wants some rest. See you tomorrow">봉군이가 쉬고 싶어 해요. 내일 또 만나요</p>
+      <div class="bacts" id="bActs">
+        <button class="opt" type="button" data-act="pet"><span aria-hidden="true">🤚</span><span data-en="Pet">쓰다듬기</span></button>
+        <button class="opt" type="button" data-act="treat"><span aria-hidden="true">🦴</span><span data-en="Treat">간식 주기</span></button>
+        <button class="opt" type="button" data-act="train"><span aria-hidden="true">🎓</span><span id="bTrain"></span></button>
+      </div>
+      <div class="bchoice" id="bChoice" hidden>
+        <button class="opt" type="button" data-pick="ok" data-en="It's okay">괜찮아</button>
+        <button class="opt" type="button" data-pick="scold" data-en="Scold him">혼내기</button>
+      </div>
+    </div>
+    <div class="sign" id="bEnd" hidden>
+      <span class="tag">ENDING</span>
+      <p class="bend" data-en="Bonggoon still doesn't wag his tail.&lt;br&gt;But when you pick up the harness,&lt;br&gt;he trembles with fear, yet his bottom bounces up and down.&lt;br&gt;He's waiting for a family who'll let him open up slowly.">봉군이는 아직 꼬리를 흔들지 않아요.<br>그래도 하네스를 들면,<br>무서워 떨면서도 엉덩이를 들썩여요.<br>천천히 마음을 열어 줄 가족을 기다려요.</p>
+      <button class="btn" id="bShare" type="button" data-en="Show off to a friend">친구에게 자랑하기</button>
+      <span class="toast" id="bToast" role="status"></span>
+      <a class="btn alt" id="bInsta" href="https://www.instagram.com/im.bonggoon/" target="_blank" rel="noopener" data-en="Bonggoon on Instagram @im.bonggoon">봉군이 인스타 @im.bonggoon</a>
+    </div>
+    <button class="again" id="bBack" type="button" data-en="← Back to start">← 처음 화면으로</button>
+  </section>
 
   <section class="sign" id="profile">
     <span class="tag">PROFILE</span>
@@ -365,10 +434,15 @@ if (TRACK_ON && !window.goatcounter?.count) {
 function track(name){
   try { if (TRACK_ON && window.goatcounter?.count) window.goatcounter.count({ path: "event/" + name, title: name, event: true }); } catch(e) {}
 }
+// "사람 수" 이벤트: 기기당 처음 한 번만 보내요 (위 이벤트는 누를 때마다 셈). 저장소가 막혀 있으면 그냥 보내요.
+function trackOnce(name){
+  try { if (localStorage.getItem("gc1:" + name)) return; localStorage.setItem("gc1:" + name, "1"); } catch(e) {}
+  track(name);
+}
 document.addEventListener("click", (e) => {
   const a = e.target.closest && e.target.closest("a[href]"); if (!a) return;
-  if (a.href.includes("docs.google.com/forms")) track("4-입양신청서클릭");
-  else if (a.href.includes("instagram.com/im.bonggoon")) track("4-봉군이인스타방문");
+  if (a.href.includes("docs.google.com/forms")) { track("4-입양신청서클릭"); trackOnce("4-입양관심-사람"); }
+  else if (a.href.includes("instagram.com/im.bonggoon")) { track("4-봉군이인스타방문"); trackOnce("4-입양관심-사람"); }
 });
 let shareMsg = "";
 // 면허증 이미지: render the license onto a 1080x1920 story canvas, cached per result.
@@ -396,6 +470,7 @@ async function startLicense(m){
   copied = false;
   try { navigator.clipboard?.writeText(STORY_LINK).then(()=>{ copied = true; }, ()=>{}); } catch(e) {}
   mode = m; track(m === "save" ? "3-공유-이미지저장버튼" : "3-공유-인스타스토리버튼");
+  if (m !== "save") trackOnce("3-공유-사람");
   const toast = document.getElementById("saveToast"); toast.textContent = "";
   if(!window.html2canvas){ toast.textContent = L("지금은 이미지를 만들 수 없어요. 화면을 캡처해 주세요.", "Can't make the image right now. Please take a screenshot instead."); return; }
   loaderOpen();
@@ -593,7 +668,7 @@ function sendKakao(){
   loaderClose();
 }
 async function shareKakao(){
-  track("3-공유-카톡");
+  track("3-공유-카톡"); trackOnce("3-공유-사람");
   if (!KAKAO_JS_KEY || !window.Kakao) return copyFallback();
   try{ if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY); }catch(e){ return copyFallback(); }
   if (kakaoImg && kakaoFor === lastResult) return sendKakao();
@@ -731,6 +806,7 @@ function finish(){
   const top = [...picks].reverse().find(k=>score[k]===best);
   showResult(top, 82 + score[top]*3); // 85~100
   track("2-결과-" + TYPES[top].name.replace(/\s/g, "")); // 이벤트 이름은 언어와 상관없이 한국어 유형 이름
+  trackOnce("2-결과-사람");
 }
 function showResult(top, pct){
   const t = T(top), ko = TYPES[top];
@@ -800,8 +876,8 @@ const DIARY = [
   ["d38","11-26","운동많이된다","Great workout",800,800],
 ];
 // 공개 규칙(사람마다): 처음 온 날 Day 1, 그 뒤 한국 날짜가 다른 날 다시 올 때마다 1편씩. 같은 날 여러 번 와도 1편.
-{ const kst = (t) => new Date(t + 9 * 36e5).toISOString().slice(0, 10); // "2026-11-26" (한국 날짜)
-  const today = kst(Date.now());
+const kstDay = () => new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10); // "2026-11-26" (한국 날짜)
+{ const today = kstDay();
   // 임보 D+N: 2026-10-04(임보 시작일)이 D+1
   $("dDay").textContent = "D+" + (Math.round((Date.parse(today) - Date.parse("2026-10-04")) / 864e5) + 1);
   let n = 1, fresh = true;
@@ -842,6 +918,175 @@ addEventListener("hashchange", preview); preview();
 if (IN_KAKAO) { try{ if (!sessionStorage.getItem("ext")) { sessionStorage.setItem("ext","1"); location.href = externalUrl(); } }catch(e){} }
 $("go").onclick = ()=>{ track("1-테스트시작"); $("start").hidden = true; $("quiz").hidden = false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
 $("again").onclick = ()=>{ i=0; score={w:0,n:0,s:0,g:0}; picks=[]; $("result").hidden=true; $("profileCta").hidden=false; $("quiz").hidden=false; show(); $("quiz").scrollIntoView({behavior:"smooth",block:"start"}); };
+
+// 봉군이랑 친해지기: 하루 5번 행동 → 유대감 점수 → 5단계(엔딩). 저장은 localStorage "bond" (막혀 있으면 이번 방문 동안만).
+// 숫자: 매일 5번을 고르게 하면 엔딩까지 8일, 아무거나 누르면 10일 안팎 (5천 번 시뮬레이션 중앙값)
+const BOND = {
+  T: [0, 10, 28, 50, 75],               // 1~5단계 시작 점수
+  DAY: 5,                               // 하루 행동 수 (한국 날짜가 바뀌면 다시 5번)
+  PET: 2, RUSH: -1,                     // 1·2단계에서 쓰다듬기를 연달아 하면 움찔, -1
+  TREAT: 2,                             // 1단계에서는 안 먹어요 (0)
+  TRAIN_OK: 3, TRAIN_NO: 1, TRAIN_P: { 3: .45, 4: .7, 5: .9 }, // 훈련은 3단계부터, 성공 확률
+  ACC_P: .2, ACC_OK: 2, ACC_SCOLD: -2,  // 소변 실수: 1·2단계, 하루 한 번까지
+  CUSH_P: .15,                          // 방석 옮기기: 1·2단계, 하루 한 번까지. 재미 이벤트라 이벤트 자체 점수는 없고 그 행동 점수만
+};
+// 문구 [한국어, 영어]: 오너가 알려 준 봉군이 사실만 (꼬리는 흔들지 않아요)
+const BL = {
+  name: [, ["벽에 붙은 봉군이", "Glued to the Wall"], ["조심조심", "Ever So Carefully"], ["슬쩍 지켜보기", "Sneaky Lookout"], ["나른한 봉군이", "Lazy Bonggoon"], ["같이 나가요", "Let's Go Out"]],
+  intro: [,
+    ["봉군이가 벽에 딱 붙어 있어요. 손만 뻗어도 움찔해요.", "Bonggoon is glued to the wall. Even reaching out makes him flinch."],
+    ["봉군이가 조심조심 지켜봐요. 꼬리는 아직 돌돌 말려 있어요.", "Bonggoon is watching you, very carefully. His tail is still tucked tight."],
+    ["화분 뒤에서 얼굴만 쑤욱 내밀고 쳐다봐요. 눈이 마주치면 쏙 숨어요.", "He pokes just his face out from behind the plant to watch you. Meet his eyes and he ducks away."],
+    ["봉군이가 소파에서 늘어지게 자요. 가끔 깨서 나른하게 쳐다봐요.", "Bonggoon is sprawled out asleep on the sofa. Now and then he wakes and gives you a sleepy look."],
+    ["하네스를 들면 떨면서도 일어났다 앉았다 해요. 같이 나가겠다는 뜻이에요.", "Pick up the harness and he trembles, yet stands up, sits down, stands up again. That means he's coming along."]],
+  pet: [,
+    ["살며시 쓰다듬었어요. 봉군이가 움찔하며 벽에 더 바짝 붙어요. 그래도 한 번 닿았어요.", "You gently stroked him. Bonggoon flinched and pressed even closer to the wall. Still, you made contact."],
+    ["쓰다듬는 동안 봉군이가 몸이 굳은 채 숨만 쉬어요. 피하지 않은 게 어디예요.", "While you pet him, Bonggoon goes stiff and just breathes. Hey, he didn't run away."],
+    ["손을 내밀자 쏙 숨었다가, 잠시 뒤 화분 옆으로 얼굴만 내밀어요.", "He ducks away from your hand, then a moment later pokes his face out beside the plant."],
+    ["누워 있는 봉군이를 쓰다듬었어요. 눈만 굴려 나른하게 쳐다봐요.", "You pet Bonggoon as he lies there. He just rolls his eyes up at you, all drowsy."],
+    ["쓰다듬는 손을 봉군이가 핥아 줘요.", "Bonggoon licks the hand that's petting him."]],
+  rush: ["아이고, 너무 서둘렀어요. 봉군이가 움찔하며 구석으로 물러나요. 천천히 해요.", "Oops, too fast. Bonggoon flinched and backed into the corner. Slowly does it."],
+  treat: [,
+    ["간식을 내려놓았지만 봉군이는 쳐다보지도 않아요. 처음엔 밥도 안 먹던 봉군이예요.", "You set down a treat, but Bonggoon won't even look at it. In the beginning he wouldn't even eat his meals."],
+    ["한참 눈치를 보더니, 간식을 아주 조금 먹었어요.", "After a long, cautious look around, he ate a tiny bit of the treat."],
+    ["간식을 잘 먹어요. 다 먹고 나서는 다시 슬쩍 지켜봐요.", "He eats the treat nicely, then goes right back to watching you on the sly."],
+    ["간식도 밥도 잘 먹어요. 먹고 나서 다시 나른하게 누워요.", "He eats his treats and his meals well. Then he flops back down, all drowsy."],
+    ["간식을 맛있게 먹고, 손까지 핥아 줘요.", "He enjoys the treat and even licks your hand."]],
+  cmd: [["손", "Paw"], ["앉아", "Sit"], ["엎드려", "Down"]],
+  acc: ["앗, 봉군이가 바닥에 쉬를 했어요. 어떻게 할까요?", "Uh-oh, Bonggoon peed on the floor. What will you do?"],
+  ok: ["괜찮다고 말해 주고 조용히 치웠어요. 봉군이 몸이 조금 풀렸어요.", "You told him it's okay and quietly cleaned up. Bonggoon relaxed a little."],
+  scold: ["봉군이가 꼬리를 말고 벽 쪽으로 숨어 버렸어요.", "Bonggoon tucked his tail and hid by the wall."],
+  cush: ["방석을 가운데로 옮겨 줬어요. 그런데 봉군이는 방석에 안 올라가고, 방석 옆 구석에 동그랗게 웅크렸어요. 역시 구석이 최고래요.",
+         "You moved his cushion to the middle of the room. But Bonggoon didn't get on it. He curled up in the corner next to it instead. Corners are the best, apparently."],
+};
+const BX = (a) => L(a[0], a[1]);
+// 장면: 배경 + 봉군이 레이어 (src 이름은 img/bond/○○.png), 누르거나 행동하면 반응
+const BSCENE = [
+  { bg: "bg3", bub: ["…", "…"], html: '<img src="dog-curl" style="left:37%;bottom:36%;width:28%">' }, // 방석 옮기기 이벤트
+  { bg: "bg1", bub: ["움찔!", "Flinch!"], html: '<img class="dog shake" src="dog1" style="left:50%;bottom:24%;width:38%">' },
+  { bg: "bg1", bub: ["…!", "…!"], html: '<img class="dog breath" src="dog2" style="left:36%;bottom:11%;width:40%">' },
+  { bg: "bg3", bub: ["쏙!", "Duck!"], html: '<img class="d3 away" src="dog3-away"><img class="d3 peek" src="dog3-peek"><img class="plant" src="plant"><img class="d3h" src="dog3-peek">' },
+  { bg: "bg4", bub: ["하암…", "Yaaawn…"], html: '<img class="d4 sleep" src="dog4-sleep"><img class="d4 yawn" src="dog4-yawn"><i class="z">Z</i><i class="z z2">z</i>' },
+  { bg: "bg3", bub: ["들썩들썩!", "Bounce, bounce!"], html: '<img class="dog5 sit" src="dog5-sit"><img class="dog5 stand" src="dog5-stand"><img class="harness" src="harness">' },
+];
+const STILL = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let B = null, bPending = false, bShown = 0, bTimers = [];
+const bAfter = (f, ms) => { const id = setTimeout(() => { bTimers = bTimers.filter((x) => x !== id); f(); }, ms); bTimers.push(id); };
+const bClear = () => { bTimers.forEach(clearTimeout); bTimers = []; }; // clearTimeout은 setInterval도 멈춰요
+function bScene(s){
+  bClear(); bShown = s;
+  const sc = $("bScene"), d = BSCENE[s];
+  sc.className = "scene s" + s; sc.style.backgroundImage = `url(img/bond/${d.bg}.png)`;
+  sc.innerHTML = d.html.replace(/src="([\w-]+)"/g, 'src="img/bond/$1.png" alt=""') + '<div class="bub"></div>';
+  sc.lastChild.textContent = BX(d.bub);
+  sc.setAttribute("aria-label", BX(s ? BL.intro[s] : BL.cush));
+  if (STILL) { if (s === 5) sc.classList.add("go"); return; } // 움직임 줄이기: 하네스 든 장면만 멈춰서 보여 줘요
+  if (s === 3) bTimers.push(setInterval(() => { if (sc.classList.contains("caught")) return;
+    sc.classList.add("out"); bAfter(() => sc.classList.remove("out"), 1600); }, 3200)); // 가끔 얼굴만 쑤욱
+  if (s === 4) bTimers.push(setInterval(bReact, 5200)); // 자다가 가끔 하품
+  if (s === 5) bHarness();
+}
+// 5단계: 하네스 등장 → 일어났다 앉았다 반복(떨면서) → 하네스 퇴장, 계속 되풀이
+function bHarness(){
+  bClear(); const sc = $("bScene"), u = sc.querySelector(".bub");
+  sc.classList.remove("go", "up"); u.classList.remove("on");
+  bAfter(() => { sc.classList.add("go"); u.classList.add("on"); let n = 0;
+    const iv = setInterval(() => { sc.classList.toggle("up"); if (++n >= 10) { clearInterval(iv); sc.classList.remove("up"); } }, 380); bTimers.push(iv); }, 1200);
+  bAfter(() => { sc.classList.remove("go", "up"); u.classList.remove("on"); }, 5600);
+  bAfter(bHarness, 7600);
+}
+function bReact(){
+  const sc = $("bScene"), s = bShown, u = sc.querySelector(".bub"), dog = sc.querySelector(".dog");
+  if (!u || s === 4 && sc.classList.contains("y")) return;
+  if (s === 5) { if (!STILL) bHarness(); return; }
+  if (s === 3) sc.classList.replace("out", "caught") || sc.classList.add("caught");
+  if (s === 4) sc.classList.add("y");
+  const r = s === 1 ? "r-flinch" : "r-freeze";
+  if (dog) { dog.classList.remove(r); void dog.offsetWidth; dog.classList.add(r); }
+  u.classList.add("on");
+  bAfter(() => { u.classList.remove("on"); sc.classList.remove("caught", "y"); dog?.classList.remove(r); }, 1400);
+}
+function bLoad(){
+  const today = kstDay();
+  if (!B) try { B = JSON.parse(localStorage.getItem("bond") || "null"); } catch (e) {}
+  if (!B || !Number.isFinite(B.p) || !/^\d{4}-\d\d-\d\d$/.test(B.d0) || B.d0 > today) B = { d0: today, day: today, n: 0, p: 0, s: 1, last: "", acc: "" };
+  B.s = Math.min(5, Math.max(1, B.s | 0)); B.n = Math.min(BOND.DAY, Math.max(0, B.n | 0));
+  if (B.day !== today) { B.day = today; B.n = 0; B.last = ""; }
+}
+function bSave(){ try { localStorage.setItem("bond", JSON.stringify(B)); } catch (e) {} }
+function bAct(k){
+  bLoad();
+  if (B.n >= BOND.DAY || bPending || (k === "train" && B.s < 3)) return bRender();
+  const s = B.s; let d, msg, rush = false;
+  if (k === "pet") { rush = s <= 2 && B.last === "pet"; d = rush ? BOND.RUSH : BOND.PET; msg = BX(rush ? BL.rush : BL.pet[s]); }
+  else if (k === "treat") { d = s === 1 ? 0 : BOND.TREAT; msg = BX(BL.treat[s]); }
+  else { const c = BX(BL.cmd[Math.floor(Math.random() * 3)]), ok = Math.random() < BOND.TRAIN_P[s];
+    d = ok ? BOND.TRAIN_OK : BOND.TRAIN_NO;
+    msg = ok ? L(`'${c}' 성공! 봉군이가 해냈어요.`, `'${c}' worked! Bonggoon did it.`)
+             : L(`'${c}' 했더니 봉군이가 가만히 쳐다만 봐요. 다음에 또 해 봐요.`, `You said '${c}', and Bonggoon just stared at you. Try again next time.`); }
+  B.n++; B.last = k;
+  // 이벤트는 단계가 오르지 않는 1·2단계 행동에서만 (단계 오름 문구에 가려지지 않게)
+  let cush = false; const ev = s <= 2 && k !== "train" && B.p + d < BOND.T[s];
+  if (ev && B.acc !== B.day && Math.random() < BOND.ACC_P) { B.acc = B.day; bPending = true; msg += " " + BX(BL.acc); }
+  else if (ev && !rush && B.cush !== B.day && Math.random() < BOND.CUSH_P) { B.cush = B.day; cush = true; msg = BX(BL.cush); }
+  bAdd(d, msg);
+  if (cush && B.s === s) bScene(0); // 다음 행동 때 원래 장면으로 돌아와요
+}
+function bPick(k){ if (!bPending) return; bPending = false; bAdd(k === "ok" ? BOND.ACC_OK : BOND.ACC_SCOLD, BX(k === "ok" ? BL.ok : BL.scold)); }
+function bAdd(d, msg){
+  B.p = Math.max(BOND.T[B.s - 1], B.p + d); // 단계는 내려가지 않아요
+  const ns = BOND.T.filter((t) => B.p >= t).length;
+  if (ns > B.s) { B.s = ns; track("친해지기-단계" + ns); msg = L(`${ns}단계가 됐어요! `, `Stage ${ns}! `) + BX(BL.intro[ns]); }
+  bSave(); bRender(msg); bReact();
+}
+function bRender(msg){
+  const left = BOND.DAY - B.n, days = Math.max(1, Math.round((Date.parse(B.day) - Date.parse(B.d0)) / 864e5) + 1), max = BOND.T[4];
+  $("bDay").textContent = L(`친해진 지 ${days}일째`, `Day ${days} together`);
+  $("bLeft").textContent = "●".repeat(left) + "○".repeat(B.n);
+  $("bLeft").setAttribute("aria-label", L(`${left}번`, `${left}`));
+  const f = Math.min(1, B.p / max) * 5;
+  [...$("bBar").children].forEach((c, i) => c.style.setProperty("--f", Math.max(0, Math.min(1, f - i))));
+  $("bBar").setAttribute("aria-label", L(`유대감 ${Math.min(B.p, max)} / ${max}`, `Bond ${Math.min(B.p, max)} / ${max}`));
+  $("bStage").textContent = L(`${B.s}단계 · `, `Stage ${B.s} · `) + BX(BL.name[B.s]);
+  if (bShown !== B.s) bScene(B.s);
+  if (msg) $("bSay").textContent = msg;
+  $("bRest").hidden = left > 0 || bPending;
+  $("bChoice").hidden = !bPending;
+  $("bTrain").textContent = B.s < 3 ? L("훈련 🔒 3단계부터", "Train 🔒 from stage 3") : L("훈련", "Train");
+  $("bActs").querySelectorAll("button").forEach((b) => { b.disabled = !left || bPending || (b.dataset.act === "train" && B.s < 3); });
+  $("bEnd").hidden = B.s < 5;
+}
+function bOpen(){
+  track("친해지기-시작");
+  bLoad(); bSave(); bShown = 0; bPending = false; // 고르지 않고 나갔던 실수 이벤트는 넘어가요
+  $("start").hidden = true; $("bond").hidden = false;
+  bRender(BX(BL.intro[B.s]));
+  $("bond").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("bondGo").onclick = bOpen;
+$("bBack").onclick = () => { bClear(); bShown = 0; $("bond").hidden = true; $("start").hidden = false; $("start").scrollIntoView({ behavior: "smooth", block: "start" }); };
+$("bActs").onclick = (e) => { const b = e.target.closest("button"); if (b) bAct(b.dataset.act); };
+$("bChoice").onclick = (e) => { const b = e.target.closest("button"); if (b) bPick(b.dataset.pick); };
+$("bScene").onclick = bReact;
+// 화면을 켜 둔 채 한국 날짜가 바뀌어도, 다시 볼 때 오늘 횟수가 새로 채워져요
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !$("bond").hidden && !bPending) { bLoad(); bRender(); } });
+// 친구에게 자랑하기 (웹: 카카오톡 공유, 안 되면 문구 복사). 토스 미니앱은 toss/entry.js가 토스 공유로 바꿔요
+$("bShare").onclick = () => {
+  track("친해지기-엔딩공유"); trackOnce("3-공유-사람");
+  const link = PAGE_URL + "?ref=kakao#bond";
+  const msg = L("가족을 기다리는 8살 봉군이와 친해졌어요. 봉군이랑 친해지기, 같이 해 봐요!", "I got close to Bonggoon, an 8-year-old dog waiting for a family. Give it a try too!");
+  try {
+    if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY);
+    Kakao.Share.sendDefault({ objectType: "feed",
+      content: { title: L("봉군이랑 친해지기", "Get close to Bonggoon"), description: msg, imageUrl: new URL("img/og.jpg", PAGE_URL).href,
+        imageWidth: 1200, imageHeight: 630, link: { mobileWebUrl: link, webUrl: link } },
+      buttons: [{ title: L("나도 친해지기", "Try it too"), link: { mobileWebUrl: link, webUrl: link } }] });
+  } catch (e) {
+    const t = msg + "\n" + link, toast = $("bToast"); toast.textContent = t;
+    navigator.clipboard?.writeText(t).then(() => { toast.textContent = L("공유 문구를 복사했어요. 친구에게 붙여 넣어 주세요.", "Share message copied. Paste it to a friend."); }, () => {});
+  }
+};
+if (location.hash === "#bond") bOpen();
 
 // 봉군이 사진 넘기기: swipe works natively (scroll-snap); buttons and counter follow the scroll position
 (function gallery(){
